@@ -1,0 +1,44 @@
+#include "init.hpp"
+#include "roottable_t.hpp"
+#include "bitmap_t.hpp"
+#include "bytemap_t.hpp"
+#include "plog_t.hpp"
+#include "allocatorlog_t.hpp"
+#include "checkpointing.hpp"
+#include "debug.hpp"
+
+#include "jemalloc/include/jemalloc/jemalloc.h"
+
+namespace gv = Escort::GlobalVariable;
+
+void Escort::init::init_roottable() {
+  gv::RootTable = reinterpret_cast<roottable_t*>(escort_malloc(sizeof(roottable_t)));
+  new(gv::RootTable) roottable_t(); // must exist on DRAM heap
+  DEBUG_PRINT("gv::RootTable:", gv::RootTable);
+  gv::NVM_config->set_root_pointer(gv::RootTable);
+}
+
+void Escort::init::init_bitmap() {
+  for(int i = 0; i < 2; i++) {
+    assert(gv::BitMap[i] == nullptr);
+    gv::BitMap[i] = NEW(bitmap_t, Escort::HEAP_SIZE);
+    assert(gv::ByteMap[i] == nullptr);
+    gv::ByteMap[i] = NEW(bytemap_dram_t, Escort::HEAP_SIZE);
+  }
+  assert(gv::ByteMap_NVM == nullptr);
+  gv::ByteMap_NVM = gv::NVM_config->pnew<bytemap_nvm_t>(Escort::HEAP_SIZE);
+  gv::NVM_config->set_bytemap_pointer(gv::ByteMap_NVM);
+}
+
+void Escort::init::init_manager() {
+  gv::Plog_Management = NEW(plog_management_t);
+  gv::Allocatorlog_Management
+    = NEW(allocatorlog_management_t);
+}
+
+void Escort::init::init_checkpointing_thread(std::uint32_t checkpointing_num) {
+  assert(gv::CpMaster == nullptr);
+  gv::NVM_config->set_checkpointing_thread(checkpointing_num);
+  gv::CpMaster = NEW(cpmaster_t, checkpointing_num);
+  gv::CpMaster->run();
+}
