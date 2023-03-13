@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <iostream>
 
-void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num = 1);
+void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num = 1, bool is_recovery = false);
+bool Escort_is_recovery(const char* nvm_path);
 void Escort_finalize();
 
 void* Escort_malloc(std::size_t size);
@@ -50,8 +51,7 @@ namespace {
     }
   }
 }
-//
-#define ESCORT_WRITE()
+
 #define PNEW(t, ...) ({ \
       pnew<t>(__VA_ARGS__);})
 #define PDELETE(obj) ({ \

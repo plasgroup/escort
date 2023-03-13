@@ -12,10 +12,11 @@
 namespace gv = Escort::GlobalVariable;
 namespace lv = Escort::LocalVariable;
 
-void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num) {
+void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num, bool is_recovery) {
   DEBUG_PRINT("Escort_init");
-  gv::NVM_config = NEW(Escort::nvmconfig_t, nvm_path);
-  if(gv::NVM_config->is_dirty()) {
+  if(gv::NVM_config == nullptr)
+    gv::NVM_config = NEW(Escort::nvmconfig_t, nvm_path);
+  if(is_recovery) {
     Escort::epoch_t epoch = Escort::Epoch(GLOBAL_EPOCH);
     DEBUG_PRINT("NVM is dirty", epoch);
     // recovery
@@ -41,6 +42,12 @@ void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num) {
   Escort::init::init_checkpointing_thread(checkpointing_num);
 
   gv::NVM_config->flush_variable();
+}
+
+bool Escort_is_recovery(const char* nvm_path) {
+  if(gv::NVM_config == nullptr)
+    gv::NVM_config = NEW(Escort::nvmconfig_t, nvm_path);
+  return gv::NVM_config->is_dirty();
 }
 
 void Escort_finalize(){
@@ -77,7 +84,7 @@ void Escort_end_op() {
   assert(lv::ctx != nullptr);
   lv::ctx->end_op();
 }
-void Escort_mark(void* addr, std::size_t size) {
+void Escort_write_region(void* addr, std::size_t size) {
   assert(lv::ctx != nullptr);
   lv::ctx->mark(addr, size);
 }
