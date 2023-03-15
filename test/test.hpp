@@ -11,5 +11,6 @@
 #define MULTI_THREAD_NUM   8
 
 void exec_list_single();
-
+void exec_list_multi(int thread_num);
+void exec_list_sort();
 #endif

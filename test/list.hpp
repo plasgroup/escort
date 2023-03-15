@@ -21,6 +21,7 @@ public:
     Escort_write_region(&_val, sizeof(int32_t));
     _val = value;
   }
+  inline int32_t get_val() const { return _val; }
   inline void set_next(Node* next) {
     Escort_write_region(&_next, sizeof(Node*));
     _next = next;
@@ -30,5 +31,5 @@ public:
 
 std::size_t get_list_size(Node* list);
 void insert(Node* list);
-
+void insert_sort(Node* list);
 #endif

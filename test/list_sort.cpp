@@ -2,13 +2,13 @@
 #include "./list.hpp"
 #include "./test.hpp"
 
-void exec_list_single() {
+void exec_list_sort() {
   Node* list = (Node*) Escort_get_root("list");
   if(list == nullptr) {
     for(int i = 0; i < INSERT_COUNT; i += TRANSACTION_NUM) {
       Escort_begin_op();
       for(int j = i; j < i + TRANSACTION_NUM; j++)
-	insert(list);
+	insert_sort(list);
       Escort_end_op();
     }
   } else {
@@ -21,7 +21,7 @@ void exec_list_single() {
     for(int i = 0; i < INSERT_COUNT - list_size; i += TRANSACTION_NUM) {
       Escort_begin_op();
       for(int j = i; j < i + TRANSACTION_NUM; j++)
-	insert(list);
+	insert_sort(list);
       Escort_end_op();
     }	
   }
