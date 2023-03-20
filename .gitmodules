@@ -1,3 +1,6 @@
 [submodule "jemalloc"]
 	path = jemalloc
 	url = git@github.com:plasgroup/escort-jemalloc.git
+[submodule "benchmark/escort-montage"]
+	path = benchmark/escort-montage
+	url = git@github.com:plasgroup/escort-montage
