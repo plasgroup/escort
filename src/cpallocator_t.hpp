@@ -13,9 +13,6 @@ private:
 private:
   void check_valid(std::vector<userthreadctx_t*>& ctx_array);
   void checkpointing(std::vector<userthreadctx_t*>& ctx_array);
-
-  void set_size_bytemap(std::size_t index, std::size_t size);
-  void clear_allocatorlog();
 public:
   inline void run_check_valid(std::vector<userthreadctx_t*>& ctx_array) { _thread = std::thread(&Escort::cpallocator_t::check_valid, this, std::ref(ctx_array)); }
   inline void run_checkpointing(std::vector<userthreadctx_t*>& ctx_array) { _thread = std::thread(&Escort::cpallocator_t::checkpointing, this, std::ref(ctx_array)); }

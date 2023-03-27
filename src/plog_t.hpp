@@ -10,7 +10,7 @@
 #include "debug.hpp"
 #include "nvm/config.hpp"
 
-#define LOG_BLOCK_NUM 1024
+#define LOG_BLOCK_NUM 4096
 
 namespace gv = Escort::GlobalVariable;
 
@@ -68,7 +68,7 @@ private:
   std::list<log_block_t*> _free_block_list;
   std::list<log_block_t*> _used_block_list;
 public:
-  plog_management_t(size_t num_blocks = 1024) {
+  plog_management_t(size_t num_blocks = 4096) {
     std::intptr_t log_area = reinterpret_cast<std::intptr_t>(gv::NVM_config->redolog_area());
     for(int i = 0; i < num_blocks; i++) {
       log_block_t* block = reinterpret_cast<log_block_t*>(log_area);

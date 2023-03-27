@@ -43,7 +43,7 @@ private:
   cpallocator_t *_cpallocator = nullptr;
   // user thread ctx;
   std::vector<userthreadctx_t*> _ctx_array;
-  std::vector<userthreadctx_t*> _ctx_delete_array;
+  std::vector<userthreadctx_t*> _ctx_delete_array[4];
   std::atomic<bool> _has_execute_right;
   std::atomic<uint32_t> _num_wait_threads;
   std::thread _thread;

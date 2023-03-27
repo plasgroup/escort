@@ -4,7 +4,10 @@
 #include "globalEscort.hpp"
 #include "plog_t.hpp"
 #include "allocatorlog_t.hpp"
+#include "bytemap_t.hpp"
 #include "nvm/config.hpp"
+
+#include "jemalloc/include/jemalloc/jemalloc.h"
 
 namespace gv = Escort::GlobalVariable;
 
@@ -27,6 +30,7 @@ void Escort::recovery::replay_redo_logs() {
 }
 
 void Escort::recovery::copy() {
+  DEBUG_PRINT("copy");
   auto dram_space = reinterpret_cast<char*>(gv::NVM_config->dram_space());
   auto nvm_space = reinterpret_cast<char*>(gv::NVM_config->nvm_space());
   DEBUG_PRINT("dram_space", (void*) dram_space, "nvm_space", (void*) nvm_space);
@@ -45,9 +49,37 @@ void Escort::recovery::copy() {
       nvm_space++;
     }
   }
-  
-  DEBUG_PRINT("copy_end");
+}
+
+void Escort::recovery::internal::replay_allocator_logs() {
+  auto all_allocatorlog_list =
+    gv::Allocatorlog_Management->free_list();
+  for(auto block: all_allocatorlog_list) {
+    std::size_t size = block->size();
+    epoch_t epoch = block->epoch();
+    if(Epoch(epoch) == Epoch(GLOBAL_EPOCH)-1) {}
+      
+    const auto entries = block->entries();
+    _mm_sfence();
+    block->clear();
+  }
+  _mm_sfence();
 }
 
 void Escort::recovery::apply_metadata() {
+  DEBUG_PRINT("apply_metadata");
+  if(Escort::get_phase(GLOBAL_EPOCH)
+     == Escort::epoch_phase::Log_Persistence)
+    Escort::recovery::internal::replay_allocator_logs();
+  std::size_t bytemap_size = Escort::HEAP_SIZE * sizeof(byte) / CACHE_LINE_SIZE;
+
+  for(int i = 0; i < bytemap_size; i++) {
+    auto bytei = gv::ByteMap_NVM->get_byte(i);
+    if(bytei >= 128) {
+      i += (bytei/CACHE_LINE_SIZE) - 1;
+    }
+    void* addr = add_addr(gv::NVM_config->dram_space(), i * CACHE_LINE_SIZE);
+    std::size_t size = bytei * CACHE_LINE_SIZE;
+    //    void* ret = escort_malloc_with_addr(addr, size);
+  }
 }

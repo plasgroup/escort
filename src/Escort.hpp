@@ -9,7 +9,6 @@
 void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num = 1, bool is_recovery = false);
 bool Escort_is_recovery(const char* nvm_path);
 void Escort_finalize();
-
 void* Escort_malloc(std::size_t size);
 void Escort_free(void* addr, std::size_t size);
 void Escort_thread_init();
@@ -25,14 +24,21 @@ T* Escort_get_root(const char* id) {
 }
 void Escort_remove_root(const char* id);
 
-#define CACHE_LINE_SIZE 64
+#define ESCORT_CACHELINE_SIZE 64
 
 namespace {
+  template<typename T>
+  void pwrite(T* addr, T val) {
+    std::size_t object_size = sizeof(T);
+    Escort_write_region(addr, object_size);
+    *addr = val;
+  }
+  
   template<class T, typename... Types>
   T* pnew(Types... args) {
     std::size_t object_size = sizeof(T);
-    if(object_size % CACHE_LINE_SIZE != 0) {
-      object_size = (object_size/CACHE_LINE_SIZE + 1) * CACHE_LINE_SIZE;
+    if(object_size % ESCORT_CACHELINE_SIZE != 0) {
+      object_size = (object_size/ESCORT_CACHELINE_SIZE + 1) * ESCORT_CACHELINE_SIZE;
     }
     T* ret = (T*) Escort_malloc(object_size);
     new (ret) T(args...);
@@ -45,16 +51,17 @@ namespace {
   void pdelete(T* obj) {
     obj->~T();
     std::size_t object_size = sizeof(T);
-    if(object_size % CACHE_LINE_SIZE != 0) {
-      object_size = (object_size/CACHE_LINE_SIZE + 1) * CACHE_LINE_SIZE;
+    if(object_size % ESCORT_CACHELINE_SIZE != 0) {
+      object_size = (object_size/ESCORT_CACHELINE_SIZE + 1) * ESCORT_CACHELINE_SIZE;
       Escort_free(obj, object_size);
     }
   }
 }
 
-#define PNEW(t, ...) ({ \
+#define PWRITE(var, val) ({			\
+      pwrite(*var, val);})
+#define PNEW(t, ...) ({				\
       pnew<t>(__VA_ARGS__);})
-#define PDELETE(obj) ({ \
+#define PDELETE(obj) ({				\
       pdelete(obj);})
-
 #endif

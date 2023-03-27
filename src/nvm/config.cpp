@@ -36,7 +36,6 @@ nvmconfig_t::~nvmconfig_t() {
 
 std::intptr_t nvmconfig_t::open_nvmfile(const char* nvm_path) {
   DEBUG_PRINT("open file", nvm_path);
-  assert(_nvm_space == 0);
   
   _nvm_fd = open(nvm_path, O_CREAT | O_RDWR,
 		 S_IRUSR | S_IWUSR);

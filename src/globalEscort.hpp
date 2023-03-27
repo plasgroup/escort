@@ -27,8 +27,8 @@ namespace Escort {
   
   using epoch_t = std::uint64_t;
   
-  extern std::uint32_t LOG_CACHE_LINE_SIZE;
-  // extern std::uint32_t CACHE_LINE_SIZE;
+  constexpr std::uint32_t LOG_CACHE_LINE_SIZE = 6;
+  constexpr std::uint32_t CACHE_LINE_SIZE = (1 << LOG_CACHE_LINE_SIZE);
   extern std::size_t HEAP_SIZE;
   extern std::intptr_t DRAM_BASE;
   

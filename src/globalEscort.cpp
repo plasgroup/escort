@@ -3,7 +3,7 @@
 #include "debug.hpp"
 
 namespace Escort {
-  std::uint32_t LOG_CACHE_LINE_SIZE = 6;
+  // std::uint32_t LOG_CACHE_LINE_SIZE = 6;
   // std::uint32_t CACHE_LINE_SIZE = (1 << LOG_CACHE_LINE_SIZE);
   std::size_t HEAP_SIZE = calc_heapsize(8);
   std::intptr_t DRAM_BASE = 0x7f9f14abd000;

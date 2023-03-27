@@ -7,7 +7,7 @@
 
 class Escort::addrlist_t {
 private:
-  std::vector<std::pair<void*, std::size_t>> _list;
+  std::vector<std::pair<void*, std::size_t>> _list; // {addr, num_bits}
   
 public:
   addrlist_t() {}

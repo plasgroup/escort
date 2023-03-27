@@ -31,11 +31,15 @@ void Escort::cpmaster_t::log_persistence_unit() {
 
     for(const auto&[addr, size]: ctx->list(prev)) {
       cacheline_t* cl = reinterpret_cast<cacheline_t*>(addr);
-      size_t base = gv::BitMap[prev]->get_index(cl);
+      std::size_t base = gv::BitMap[prev]->get_index(cl);
+      debug::add_plog(size);
+      
       for(int i = 0; i < size; i++) {
     	cacheline_t& value = *cl;
-	_log->push_back_and_clwb({cl, value});
-    	gv::BitMap[prev]->clear(base+i);
+	if(gv::BitMap[prev]->is_set(base+i)) {
+	  _log->push_back_and_clwb({cl, value});
+	  gv::BitMap[prev]->clear(base+i);
+	} // if bit is clear, CoW has happened
     	cl++;
       }
     }
@@ -110,8 +114,8 @@ void Escort::cpmaster_t::nvm_heap_update() {
 }
 
 // cpu_bind() suppose NVM is
-// connected with first socket
-// if NVM is connected with second socket,
+// connected with first socket.
+// If NVM is connected with second socket,
 // change obj->children[0] => obj->children[1]  
 void Escort::cpmaster_t::cpu_bind() {
   hwloc_topology_init(&topology);
@@ -145,7 +149,6 @@ void Escort::cpmaster_t::finalize(epoch_t epoch) {
 void Escort::cpmaster_t::checkpointing() {
   cpu_bind(); // bind cpu connected NVM directly
   epoch_t epoch = Epoch(GLOBAL_EPOCH);
-  
   while(gv::isPersisting) {
     DEBUG_PRINT("checkpionting", epoch);
     while(!has_execute_right()) { /* wait */ }
@@ -161,29 +164,36 @@ void Escort::cpmaster_t::checkpointing() {
     epoch = set_phase(epoch, epoch_phase::Log_Persistence);
     GLOBAL_EPOCH = epoch;
 
-    run_deallocator(); // for deallocation of  delayed free operations
-    
-    log_persistence();
+    run_deallocator(); // for deallocation of delayed free operations
 
+    debug::timer_start();
+    log_persistence();
+    debug::timer_end(debug::time_log_persistence);
+    
     _mm_sfence();
     epoch = set_phase(epoch, epoch_phase::NVM_Heap_Update);
     GLOBAL_EPOCH = epoch;
     _mm_mfence();
 
+    debug::timer_start();
     nvm_heap_update();
-
+    debug::timer_end(debug::time_nvm_heap_update);
+    
     join_deallocator(); // join deallocator 
     
     release_execute_right();
     
     auto time_end   = std::chrono::system_clock::now();
-    auto checkpointing_time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_end).count());
+    auto checkpointing_time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_start).count());
+    debug::time_checkpointing += checkpointing_time;
     if(checkpointing_time < gv::EpochLength)
       std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<std::uint64_t>(gv::EpochLength - checkpointing_time)));
 
     while(_num_wait_threads.load(std::memory_order_acquire) > 0) { /* wait */ }
   }
 
+  debug::timer_ave(epoch);
+  debug::plog_ave(epoch);
   finalize(epoch);
 }
 
@@ -192,7 +202,7 @@ void Escort::cpmaster_t::init_userthreadctx(userthreadctx_t* ctx) {
 
   while(!has_execute_right()) { /* wait */ }
   
-  DEBUG_PRINT("add user");
+  DEBUG_PRINT("init user");
   
   _ctx_array.push_back(ctx);
   gv::NVM_config->add_user_num();
@@ -205,8 +215,11 @@ void Escort::cpmaster_t::finalize_userthreadctx(userthreadctx_t* ctx) {
   _num_wait_threads.fetch_add(1);
   while(!has_execute_right()) { /* wait */ }
   
-  DEBUG_PRINT("sub user");
-  _ctx_delete_array.push_back(ctx);
+  DEBUG_PRINT("finalize user");
+  epoch_t epoch = GLOBAL_EPOCH;
+  auto id = static_cast<uint32_t>((epoch-2) % 4);
+  
+  _ctx_delete_array[id].push_back(ctx);
 
   _num_wait_threads.fetch_sub(1);
   release_execute_right();

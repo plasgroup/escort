@@ -38,27 +38,14 @@ void Escort::cpallocator_t::checkpointing(std::vector<userthreadctx_t*>& ctx_arr
       auto entries = block->entries();
       for(int i = 0; i < size; i++) {
 	auto& entry = entries[i];
-	const auto index = gv::ByteMap[prev]->get_index(entry.addr);
-	set_size_bytemap(index, entry.size);
+	auto index = gv::ByteMap[prev]->get_index(entry.addr);
+	gv::ByteMap_NVM->set_obj_size(index, entry.size);
+	gv::ByteMap_NVM->clwb(index);
       }
     }
+    _mm_sfence();
+    allocatorlog.clear();
   }
   _mm_sfence();
 }
 
-void Escort::cpallocator_t::set_size_bytemap(std::size_t index, std::size_t size) {
-  std::size_t  tmp_index = index;
-  std::int64_t tmp_size  = size/CACHE_LINE_SIZE;
-  
-  for(; tmp_size > 0; tmp_size -= CACHE_LINE_SIZE) {
-    if(tmp_size >= CACHE_LINE_SIZE)
-      gv::ByteMap_NVM->set(tmp_index, CACHE_LINE_SIZE);
-    else
-      gv::ByteMap_NVM->set(tmp_index, tmp_size);
-    tmp_index++;
-  }
-
-  for(int loop_count = 0; loop_count < size/CACHE_LINE_SIZE; loop_count += CACHE_LINE_SIZE) {
-    gv::ByteMap_NVM->clwb(index+loop_count);
-  }
-}

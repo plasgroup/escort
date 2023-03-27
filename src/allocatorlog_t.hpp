@@ -8,7 +8,7 @@
 #include "globalEscort.hpp"
 #include "nvm/config.hpp"
 
-#define ALLOCATOR_LOG_BLOCK_NUM 1024
+#define ALLOCATOR_LOG_BLOCK_NUM 4096
 
 namespace gv = Escort::GlobalVariable;
 
@@ -83,7 +83,7 @@ private:
   std::list<allocatorlog_block_t*> _free_block_list;
   std::list<allocatorlog_block_t*> _used_block_list;
 public:
-  allocatorlog_management_t(size_t num_blocks = 1024) {
+  allocatorlog_management_t(size_t num_blocks = 4096) {
     std::intptr_t log_area = reinterpret_cast<std::intptr_t>(gv::NVM_config->allocatorlog_area());
     
     for(int i = 0; i < num_blocks; i++) {
@@ -109,6 +109,9 @@ public:
     _used_block_list.remove(log_block);
   }
 
+  inline const std::list<allocatorlog_block_t*>& free_list() const {
+    return _free_block_list;
+  }
   inline const std::list<allocatorlog_block_t*>& used_list() const {
     return _used_block_list;
   }

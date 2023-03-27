@@ -12,7 +12,7 @@
 namespace gv = Escort::GlobalVariable;
 
 void Escort::init::init_roottable() {
-  gv::RootTable = reinterpret_cast<roottable_t*>(escort_malloc(sizeof(roottable_t)));
+  gv::RootTable = reinterpret_cast<roottable_t*>(_escort_internal_malloc(sizeof(roottable_t)));
   new(gv::RootTable) roottable_t(); // must exist on DRAM heap
   DEBUG_PRINT("gv::RootTable:", gv::RootTable);
   gv::NVM_config->set_root_pointer(gv::RootTable);

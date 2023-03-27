@@ -16,6 +16,10 @@ void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num, bool is_
   DEBUG_PRINT("Escort_init");
   if(gv::NVM_config == nullptr)
     gv::NVM_config = NEW(Escort::nvmconfig_t, nvm_path);
+
+  Escort::init::init_bitmap();
+  Escort::init::init_manager();
+  
   if(is_recovery) {
     Escort::epoch_t epoch = Escort::Epoch(GLOBAL_EPOCH);
     DEBUG_PRINT("NVM is dirty", epoch);
@@ -37,8 +41,6 @@ void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num, bool is_
     Escort::init::init_roottable();
   }
 
-  Escort::init::init_bitmap();
-  Escort::init::init_manager();
   Escort::init::init_checkpointing_thread(checkpointing_num);
 
   gv::NVM_config->flush_variable();
