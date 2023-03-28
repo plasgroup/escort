@@ -29,7 +29,6 @@ void Escort::cpmaster_t::log_persistence_unit() {
   auto prev = static_cast<bool>((Epoch(GLOBAL_EPOCH)-1) & 0x1);
   for(auto ctx: _ctx_array) {
     DEBUG_PRINT("list_size:", ctx->list(prev).size());
-
     for(const auto&[addr, size]: ctx->list(prev)) {
       cacheline_t* cl = reinterpret_cast<cacheline_t*>(addr);
       std::size_t base = gv::BitMap[prev]->get_index(cl);
@@ -50,9 +49,9 @@ void Escort::cpmaster_t::log_persistence_unit() {
   auto prev = static_cast<bool>((Epoch(GLOBAL_EPOCH)-1) & 0x1);
   for(auto ctx: _ctx_array) {
     auto addrlist = ctx->list(prev);
-    debug::add_plog(addrlist.size());
-    while(!addrlist.is_empty()) {
-      cacheline_t* cl = reinterpret_cast<cacheline_t*>(addrlist.pop());
+    debug::add_plog(addrlist->size());
+    while(!addrlist->is_empty()) {
+      cacheline_t* cl = reinterpret_cast<cacheline_t*>(addrlist->pop());
       cacheline_t& value = *cl;
       std::size_t idx = gv::BitMap[prev]->get_index(cl);
       if(gv::BitMap[prev]->is_set(idx)) {
@@ -214,7 +213,6 @@ void Escort::cpmaster_t::checkpointing() {
     debug::time_checkpointing += checkpointing_time;
     if(checkpointing_time < gv::EpochLength)
       std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<std::uint64_t>(gv::EpochLength - checkpointing_time)));
-
     while(_num_wait_threads.load(std::memory_order_acquire) > 0) { /* wait */ }
   }
 

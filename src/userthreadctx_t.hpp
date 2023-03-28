@@ -54,7 +54,11 @@ namespace Escort {
     void  remove_root(const char* id);
 
     // for checkpointing thread
+#ifndef OLD_VERSION
     inline addrlist_t& list(bool id) const { return *_addrlist[id]; }
+#else
+    inline addrlist_t* list(bool id) const { return _addrlist[id]; }
+#endif
     inline plog_t& log() const { return *_log; }
     inline allocatorlog_t& allocatorlog(bool id = 0) const { return *_allocatorlog[id]; }
     inline const std::list<void*>& dealloc_list(bool id = 0) const { return _delay_dealloc_list[id]; }
