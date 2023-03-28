@@ -7,7 +7,7 @@
 #include "bytemap_t.hpp"
 #include "nvm/config.hpp"
 
-#include "jemalloc/include/jemalloc/jemalloc.h"
+#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 namespace gv = Escort::GlobalVariable;
 

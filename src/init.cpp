@@ -7,7 +7,7 @@
 #include "checkpointing.hpp"
 #include "debug.hpp"
 
-#include "jemalloc/include/jemalloc/jemalloc.h"
+#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 namespace gv = Escort::GlobalVariable;
 

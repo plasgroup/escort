@@ -8,7 +8,7 @@
 #include "cacheline_t.hpp"
 #include "roottable_t.hpp"
 
-#include "jemalloc/include/jemalloc/jemalloc.h"
+#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 using namespace Escort;
 namespace gv = Escort::GlobalVariable;

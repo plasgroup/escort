@@ -4,7 +4,7 @@
 #include <vector>
 #include "globalEscort.hpp"
 
-#include "jemalloc/include/jemalloc/jemalloc.h"
+#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 class Escort::deallocator_t {
 private:
