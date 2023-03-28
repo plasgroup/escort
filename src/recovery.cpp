@@ -11,6 +11,7 @@
 
 namespace gv = Escort::GlobalVariable;
 
+#ifndef OLD_VERSION
 void Escort::recovery::replay_redo_logs() {
   DEBUG_PRINT("replay_redo_logs");
   auto all_plog_list =  gv::Plog_Management->free_list();
@@ -83,3 +84,9 @@ void Escort::recovery::apply_metadata() {
     //    void* ret = escort_malloc_with_addr(addr, size);
   }
 }
+#else // OLD_VERSION does not support recovery functions
+void Escort::recovery::replay_redo_logs() {}
+void Escort::recovery::copy() {}
+void Escort::recovery::internal::replay_allocator_logs(){}
+void Escort::recovery::apply_metadata() {}
+#endif

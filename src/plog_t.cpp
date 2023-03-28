@@ -2,6 +2,7 @@
 
 namespace gv = Escort::GlobalVariable;
 
+#ifndef OLD_VERSION
 void Escort::plog_t::push_back_and_clwb(std::pair<cacheline_t*, cacheline_t&> entry) {
   if(_block_list.empty()) { // first exec in each epoch
     log_block_t* tail_init = gv::Plog_Management->pop();
@@ -30,3 +31,20 @@ void Escort::plog_t::clear() {
   }
   _mm_sfence();
 }
+#else
+void Escort::plog_t::push_back_and_clwb(std::pair<cacheline_t*, cacheline_t&> entry) {
+  _array[_size].set(entry);
+  _size++;
+}
+void Escort::plog_t::flush() {
+  _mm_clwb(&_size);
+}
+void Escort::plog_t::clear() {
+  _size = 0;
+  _mm_clwb(&_size);
+}
+Escort::plog_t::entry_t& Escort::plog_t::pop() {
+  _size--;
+  return _array[_size];  
+}
+#endif

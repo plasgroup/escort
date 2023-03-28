@@ -131,6 +131,8 @@ void userthreadctx_t::mark(void* addr, std::size_t size) {
   auto addr_ptr = reinterpret_cast<std::intptr_t>(addr);
   addr_ptr -= addr_ptr%CACHE_LINE_SIZE;
   addr = reinterpret_cast<void*>(addr_ptr);
+
+#ifndef OLD_VERSION
   std::pair<void*, std::size_t> addrlist_entry = {addr, num_bits};
   for(; index < end_index; index++) {
     if(!gv::BitMap[curr]->is_set(index)) { // set bit
@@ -147,6 +149,21 @@ void userthreadctx_t::mark(void* addr, std::size_t size) {
   }
   if(is_append_list) 
     _addrlist[curr]->append(addrlist_entry);
+#else
+  for(; index < end_index; index++) {
+    if(!gv::BitMap[curr]->is_set(index)) { // set bit
+      if(gv::BitMap[prev]->is_set(index)) { // check whether CoW
+	debug::add_plog_user();
+	cacheline_t &old_val = *(reinterpret_cast<cacheline_t*>(addr));
+	gv::BitMap[prev]->clear(index);
+	_log->push_back_and_clwb({reinterpret_cast<cacheline_t*>(addr), old_val});
+      }
+      gv::BitMap[curr]->set(index);
+      _addrlist[curr]->append(addr);
+    }
+    addr = add_addr(addr, CACHE_LINE_SIZE);
+  }
+#endif  
 }
 
 void userthreadctx_t::set_root(const char* id, void* addr) {

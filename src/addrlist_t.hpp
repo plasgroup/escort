@@ -3,8 +3,10 @@
 
 #include <utility>
 #include <vector>
+#include <cassert>
 #include "globalEscort.hpp"
 
+#ifndef OLD_VERSION
 class Escort::addrlist_t {
 private:
   std::vector<std::pair<void*, std::size_t>> _list; // {addr, num_bits}
@@ -46,5 +48,34 @@ public:
     return _list.end();
   }
 };
+#else
+class Escort::addrlist_t {
+public:
+  void **_list;
+  std::size_t _size;
+  std::size_t _max_size = LOG_SIZE;
+  const std::size_t _margin = 4000;
 
+  addrlist_t() {
+    _list = reinterpret_cast<void**>(std::malloc(sizeof(void*)*LOG_SIZE));
+    for(int i = 0; i < LOG_SIZE; i++)
+      _list[i] = nullptr;
+    _size = 0;
+    _max_size = LOG_SIZE;
+  }
+  
+  inline void append(void* addr) {
+    assert(_size < _max_size);
+    _list[_size] = addr;
+    _size++;
+  }
+  inline void* pop() {
+    assert(_size > 0);
+    _size--;
+    return _list[_size];
+  }
+  inline bool is_empty() const { return (_size == 0); }
+  inline const std::size_t size() const { return _size; }
+};
+#endif
 #endif

@@ -25,6 +25,7 @@ void Escort::cpmaster_t::wait_previous_epoch_transactions(epoch_t epoch) {
 }
 
 void Escort::cpmaster_t::log_persistence_unit() {
+#ifndef OLD_VERSION
   auto prev = static_cast<bool>((Epoch(GLOBAL_EPOCH)-1) & 0x1);
   for(auto ctx: _ctx_array) {
     DEBUG_PRINT("list_size:", ctx->list(prev).size());
@@ -45,6 +46,22 @@ void Escort::cpmaster_t::log_persistence_unit() {
     }
     ctx->list(prev).clear();
   }
+#else
+  auto prev = static_cast<bool>((Epoch(GLOBAL_EPOCH)-1) & 0x1);
+  for(auto ctx: _ctx_array) {
+    auto addrlist = ctx->list(prev);
+    debug::add_plog(addrlist.size());
+    while(!addrlist.is_empty()) {
+      cacheline_t* cl = reinterpret_cast<cacheline_t*>(addrlist.pop());
+      cacheline_t& value = *cl;
+      std::size_t idx = gv::BitMap[prev]->get_index(cl);
+      if(gv::BitMap[prev]->is_set(idx)) {
+	_log->push_back_and_clwb({cl, value});
+	gv::BitMap[prev]->clear(idx);
+      } // if bit is clear, CoW has happened
+    }
+  }
+#endif  
 }
 
 void Escort::cpmaster_t::log_persistence_multi() {
@@ -64,6 +81,7 @@ void Escort::cpmaster_t::log_persistence() {
 }
 
 void Escort::cpmaster_t::replay_redo_log(plog_t& log) {
+#ifndef OLD_VERSION
   auto block_list = log.block_list();
   for(plog_t::log_block_t* block: block_list) {
     std::size_t size = block->size();
@@ -75,6 +93,14 @@ void Escort::cpmaster_t::replay_redo_log(plog_t& log) {
       _mm_clwb(nvm_cl);
     }
   }
+#else
+  while(!log.is_empty()) {
+    auto entry = log.pop();
+    cacheline_t* nvm_cl = add_addr(entry.addr, gv::NVM_config->offset());
+    *nvm_cl = entry.val;
+    _mm_clwb(nvm_cl);
+  }
+#endif
 }
 
 void Escort::cpmaster_t::clear_redo_logs() {

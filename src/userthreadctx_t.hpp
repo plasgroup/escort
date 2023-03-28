@@ -27,7 +27,12 @@ namespace Escort {
 	_addrlist[i] = NEW(addrlist_t);
 	_allocatorlog[i] = NEW(allocatorlog_t);
       }
+#ifndef OLD_VERSION
       _log = NEW(plog_t);
+#else
+      _log = reinterpret_cast<plog_t*>(gv::NVM_config->malloc(sizeof(plog_t)));
+      new(_log) plog_t();
+#endif
     }
     ~userthreadctx_t() {}
 

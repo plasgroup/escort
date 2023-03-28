@@ -14,6 +14,7 @@
 
 namespace gv = Escort::GlobalVariable;
 
+#ifndef OLD_VERSION
 class Escort::plog_t {
 public:
   class log_block_t {
@@ -100,4 +101,41 @@ public:
     return _used_block_list;
   }
 };
+#else
+class Escort::plog_t {
+public:
+  class entry_t {
+  public:
+    cacheline_t* addr;
+    cacheline_t  val;
+  public:
+    entry_t() {}
+    inline void set(std::pair<cacheline_t*, cacheline_t&> entry) {
+      addr = entry.first;
+      _mm_clwb(&addr);
+      val  = entry.second;
+      _mm_clwb(&val);
+    }
+    void clear() {
+      addr = nullptr; val = 0;
+      _mm_clwb(&addr);
+      _mm_clwb(&val);
+    }
+  };
+
+private:
+  entry_t _array[LOG_SIZE];
+  std::size_t _size;
+  std::size_t _max_size;
+public:
+  plog_t() :_size(0), _max_size(LOG_SIZE){}
+  void push_back_and_clwb(std::pair<cacheline_t*, cacheline_t&> entry);
+  entry_t& pop();
+  inline bool is_empty() const { return _size == 0; }
+  void flush();
+  void clear();
+};
+
+class Escort::plog_management_t{}; // do not use this class object
+#endif
 #endif

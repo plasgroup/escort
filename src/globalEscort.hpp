@@ -90,6 +90,10 @@ namespace Escort {
 
 #define GLOBAL_EPOCH *(Escort::GlobalVariable::Epoch)
 
+#ifdef OLD_VERSION
+#define LOG_SIZE 4096*1024*4
+#endif
+
 #define NEW(t, ...) ({				\
       Escort::default_new<t>(__VA_ARGS__);})
 #define DELETE(obj) ({				\
