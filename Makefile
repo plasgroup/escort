@@ -1,6 +1,6 @@
 COMPILER  := g++
 CPPFLAGS  := -g3 -pthread -mclwb -std=c++2a -O3 -shared -fPIC
-CPPFLAGS  += -DIMPLEMENT_MODE -DDEBUG_MODE
+CPPFLAGS  += -DMEASURE -DNDEBUG #-DOLD_VERSION
 LDFLAGS   := -ljemalloc -L./src/jemalloc/lib -lhwloc
 
 SRCDIR      := src
