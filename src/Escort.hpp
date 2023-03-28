@@ -6,23 +6,23 @@
 #include <cstdint>
 #include <iostream>
 
-void Escort_init(const char* nvm_path, std::uint32_t checkpointing_num = 1, bool is_recovery = false);
-bool Escort_is_recovery(const char* nvm_path);
-void Escort_finalize();
-void* Escort_malloc(std::size_t size);
-void Escort_free(void* addr, std::size_t size);
-void Escort_thread_init();
-void Escort_thread_finalize();
-void Escort_begin_op();
-void Escort_end_op();
-void Escort_write_region(void* addr, std::size_t size);
-void Escort_set_root(const char* id, void* addr);
-void* Escort_get_root(const char* id);
+void escort_init(const char* nvm_path, std::uint32_t checkpointing_num = 1, bool is_recovery = false);
+bool escort_is_recovery(const char* nvm_path);
+void escort_finalize();
+void* escort_malloc(std::size_t size);
+void escort_free(void* addr, std::size_t size);
+void escort_thread_init();
+void escort_thread_finalize();
+void escort_begin_op();
+void escort_end_op();
+void escort_write_region(void* addr, std::size_t size);
+void escort_set_root(const char* id, void* addr);
+void* escort_get_root(const char* id);
 template<class T>
-T* Escort_get_root(const char* id) {
-  return reinterpret_cast<T*>(Escort_get_root(id));
+T* escort_get_root(const char* id) {
+  return reinterpret_cast<T*>(escort_get_root(id));
 }
-void Escort_remove_root(const char* id);
+void escort_remove_root(const char* id);
 
 #define ESCORT_CACHELINE_SIZE 64
 
@@ -30,7 +30,7 @@ namespace {
   template<typename T>
   void pwrite(T* addr, T val) {
     std::size_t object_size = sizeof(T);
-    Escort_write_region(addr, object_size);
+    escort_write_region(addr, object_size);
     *addr = val;
   }
   
@@ -40,7 +40,7 @@ namespace {
     if(object_size % ESCORT_CACHELINE_SIZE != 0) {
       object_size = (object_size/ESCORT_CACHELINE_SIZE + 1) * ESCORT_CACHELINE_SIZE;
     }
-    T* ret = (T*) Escort_malloc(object_size);
+    T* ret = (T*) escort_malloc(object_size);
     new (ret) T(args...);
     if((void*) ret == (void*) 0x7f9f164d9fc8)
       std::cout << "ret: " << ret << ", size: " << object_size << std::endl;
@@ -53,7 +53,7 @@ namespace {
     std::size_t object_size = sizeof(T);
     if(object_size % ESCORT_CACHELINE_SIZE != 0) {
       object_size = (object_size/ESCORT_CACHELINE_SIZE + 1) * ESCORT_CACHELINE_SIZE;
-      Escort_free(obj, object_size);
+      escort_free(obj, object_size);
     }
   }
 }
