@@ -15,25 +15,26 @@ std::size_t get_list_size(Node* list) {
   return list_size;
 }
 
-void insert(Node* list) {
+Node* insert(Node* list) {
   Node* new_node = PNEW(Node, 1);
   new_node->set_next(list);
   list = new_node;
-  Escort_set_root("list", list);
+  escort_set_root("list", list);
   std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  return list;
 }
 
-void insert_sort(Node* list) {
+Node* insert_sort(Node* list) {
   std::random_device rnd;
   Node* new_node = PNEW(Node, rnd());
 
   if(list == nullptr) {
     list = new_node;
-    Escort_set_root("list", list);
+    escort_set_root("list", list);
   } else if(list->get_val() >= new_node->get_val()) {
     new_node->set_next(list);
     list = new_node;
-    Escort_set_root("list", list);
+    escort_set_root("list", list);
   } else {
     auto list_tmp = list;
     while(list_tmp->get_next() != nullptr) {
@@ -44,4 +45,5 @@ void insert_sort(Node* list) {
     new_node->set_next(list_tmp->get_next());
     list_tmp->set_next(new_node);    
   }
+  return list;
 }

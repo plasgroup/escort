@@ -3,13 +3,13 @@
 #include "./test.hpp"
 
 void exec_list_sort() {
-  Node* list = (Node*) Escort_get_root("list");
+  Node* list = (Node*) escort_get_root("list");
   if(list == nullptr) {
     for(int i = 0; i < INSERT_COUNT; i += TRANSACTION_NUM) {
-      Escort_begin_op();
+      escort_begin_op();
       for(int j = i; j < i + TRANSACTION_NUM; j++)
 	insert_sort(list);
-      Escort_end_op();
+      escort_end_op();
     }
   } else {
     std::size_t list_size = get_list_size(list);
@@ -19,10 +19,10 @@ void exec_list_sort() {
       std::cerr << "recovery list fails: " << list_size << std::endl;
 
     for(int i = 0; i < INSERT_COUNT - list_size; i += TRANSACTION_NUM) {
-      Escort_begin_op();
+      escort_begin_op();
       for(int j = i; j < i + TRANSACTION_NUM; j++)
 	insert_sort(list);
-      Escort_end_op();
+      escort_end_op();
     }	
   }
 }

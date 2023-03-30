@@ -2,15 +2,13 @@
 #include "./list.hpp"
 #include "./test.hpp"
 
-#define KILL_MODE
-
 int main(int argc, char* argv[]) {
   if(argc != 2)
     std::cerr << "The execution format is different" << std::endl;
 
-  bool is_recovery = Escort_is_recovery("/mnt/pmem/test");
-  Escort_init("/mnt/pmem/test", 1, is_recovery);
-  Escort_thread_init();
+  bool is_recovery = escort_is_recovery("/mnt/pmem/test");
+  escort_init("/mnt/pmem/test", 1, is_recovery);
+  escort_thread_init();
 
   int op = atoi(argv[1]);
   switch(op) {
@@ -24,8 +22,6 @@ int main(int argc, char* argv[]) {
     exec_list_sort();
     break;
   }
-#ifdef KILLMODE
-#endif
-  Escort_thread_finalize();
-  Escort_finalize();
+  escort_thread_finalize();
+  escort_finalize();
 }

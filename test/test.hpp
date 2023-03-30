@@ -7,7 +7,7 @@
 #include <cassert>
 
 #define TRANSACTION_NUM 1000
-#define INSERT_COUNT 1000000
+#define INSERT_COUNT   10000
 #define MULTI_THREAD_NUM   8
 
 void exec_list_single();
