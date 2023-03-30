@@ -10,7 +10,7 @@
 #include "debug.hpp"
 #include "nvm/config.hpp"
 
-#define LOG_BLOCK_NUM 4096
+#define LOG_BLOCK_NUM (4096*8)
 
 namespace gv = Escort::GlobalVariable;
 
@@ -25,14 +25,16 @@ public:
       alignas(CACHE_LINE_SIZE) cacheline_t val;
     };
   private:
+    entry_t _entries[LOG_BLOCK_NUM];
     std::size_t _size;
     std::size_t _max_size;
-    entry_t _entries[LOG_BLOCK_NUM];
   public:
     log_block_t(): _size(0), _max_size(LOG_BLOCK_NUM) {}
     inline std::size_t size() const { return _size; }
     inline const entry_t* entries() const { return reinterpret_cast<const entry_t*>(&_entries); }
     inline bool append(std::pair<cacheline_t*, cacheline_t&> entry) {
+      if(_size > LOG_BLOCK_NUM)
+	DEBUG_ERROR("plog size error:", _size);
       if(_size == LOG_BLOCK_NUM)
 	return false;
       
@@ -69,7 +71,7 @@ private:
   std::list<log_block_t*> _free_block_list;
   std::list<log_block_t*> _used_block_list;
 public:
-  plog_management_t(size_t num_blocks = 4096) {
+  plog_management_t(size_t num_blocks = 1024) {
     std::intptr_t log_area = reinterpret_cast<std::intptr_t>(gv::NVM_config->redolog_area());
     for(int i = 0; i < num_blocks; i++) {
       log_block_t* block = reinterpret_cast<log_block_t*>(log_area);

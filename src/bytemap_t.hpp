@@ -85,7 +85,6 @@ public:
     }
   }
   
-  
 #ifdef DEBUG_MODE
   void debug_print() {
     for(std::size_t i = 0; i < Escort::HEAP_SIZE/CACHE_LINE_SIZE; i++) {

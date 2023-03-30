@@ -8,10 +8,12 @@
 #include "globalEscort.hpp"
 #include "nvm/config.hpp"
 
-#define ALLOCATOR_LOG_BLOCK_NUM 4096
+#define ALLOCATOR_LOG_BLOCK_NUM (4096*16)
 
 namespace gv = Escort::GlobalVariable;
 
+#if 1
+// #ifdef OLD_VERSION
 class Escort::allocatorlog_t {
 public:
   class log_block_t {
@@ -22,12 +24,12 @@ public:
       std::size_t size;
       bool is_valid;
     };
+  public:
+    entry_t _entries[ALLOCATOR_LOG_BLOCK_NUM];
   private:
     std::size_t _size;
     std::size_t _max_size;
     epoch_t _epoch;
-  public:
-    entry_t _entries[ALLOCATOR_LOG_BLOCK_NUM];
   public:
     log_block_t():_size(0), _max_size(ALLOCATOR_LOG_BLOCK_NUM) {}
     inline std::size_t size() const { return _size; }
@@ -48,6 +50,8 @@ public:
     }
     
     bool append(std::pair<void*, std::size_t> entry) {
+      if(_size > ALLOCATOR_LOG_BLOCK_NUM)
+	DEBUG_ERROR("allocatorlog size error:", _size);
       if(_size == ALLOCATOR_LOG_BLOCK_NUM)
 	return false;
       
@@ -83,7 +87,7 @@ private:
   std::list<allocatorlog_block_t*> _free_block_list;
   std::list<allocatorlog_block_t*> _used_block_list;
 public:
-  allocatorlog_management_t(size_t num_blocks = 4096) {
+  allocatorlog_management_t(size_t num_blocks = 1024) {
     std::intptr_t log_area = reinterpret_cast<std::intptr_t>(gv::NVM_config->allocatorlog_area());
     
     for(int i = 0; i < num_blocks; i++) {
@@ -116,5 +120,54 @@ public:
     return _used_block_list;
   }
 };
-
+#else
+class Escort::allocatorlog_t {
+public:
+  class entry_t {
+  public:
+    void* addr;
+    std::size_t size;
+    epoch_t epoch;
+    std::uint64_t is_valid;
+  public:
+    inline void set(void* addr, std::size_t size, epoch_t epoch, std::uint64_t is_valid) {
+      this->addr     = addr;
+      this->size     = size;
+      this->epoch    = epoch;
+      this->is_valid = is_valid;
+    }
+    inline void to_valid() {
+      is_valid = INVALID_ENTRY;
+      _mm_clwb(&is_valid);
+    }
+  };
+private:
+  entry_t _array[LOG_SIZE/4];
+  std::size_t _size;
+  std::size_t _max_size;
+public:
+  AllocatorLog(): _size(0), _max_size(LOG_SIZE/4) {}
+  inline void clear() {
+    _size = 0;
+    _mm_clwb(&_size);
+  }
+  inline std::size_t size() const { return _size; }
+  inline bool is_empty() const { return (_size == 0); }
+  inline entry_t* pop() {
+    _size--;
+    return &_arary[_size];
+  }
+  void append(void* addr, std::size_t size, epoch_t epoch, std::uint64_t is_valid) {
+    _array[_size].set(addr, size, epoch, flag);
+    _mm_clwb(&_array[_size]);
+    _size++;
+  }
+  entry_t* entry(int index) {
+    return _array[index];
+  }
+  inline void flush() {
+    _mm_clwb(&_size);
+  }
+};
+#endif
 #endif

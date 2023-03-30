@@ -92,6 +92,9 @@ namespace Escort {
 
 #ifdef OLD_VERSION
 #define LOG_SIZE 4096*1024*4
+#define MALLOC_FLAG    1
+#define FREE_FLAG      0
+#define INVALID_ENTRY -1
 #endif
 
 #define NEW(t, ...) ({				\

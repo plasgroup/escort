@@ -30,7 +30,7 @@ inline void* userthreadctx_t::malloc_with_create_log(std::size_t size) {
     gv::ByteMap[curr]->reverse(index);
   } else {
     gv::ByteMap[curr]->set(index);
-    // _allocatorlog[curr]->append({ret, size}, epoch);
+    _allocatorlog[curr]->append({ret, size}, epoch);
   }
   
   if(is_out_of_transaction) {
@@ -58,7 +58,7 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
     gv::ByteMap[curr]->reverse(index);
   } else {
     gv::ByteMap[curr]->set(index);
-    // _allocatorlog[curr]->append({addr, size}, epoch);
+    _allocatorlog[curr]->append({addr, size}, epoch);
   }
   
   // this if statement considers that
@@ -108,6 +108,9 @@ void userthreadctx_t::begin_op() {
   do {
     set_epoch(GLOBAL_EPOCH, std::memory_order_seq_cst);
   } while(get_epoch(std::memory_order_relaxed) != GLOBAL_EPOCH);
+  if(get_epoch(std::memory_order_relaxed) == 0)
+    std::cout << GLOBAL_EPOCH << std::endl;
+  assert(get_epoch(std::memory_order_relaxed) != 0);
 #endif
 }
 

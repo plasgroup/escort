@@ -81,7 +81,8 @@ void Escort::recovery::apply_metadata() {
     }
     void* addr = add_addr(gv::NVM_config->dram_space(), i * CACHE_LINE_SIZE);
     std::size_t size = bytei * CACHE_LINE_SIZE;
-    //    void* ret = escort_malloc_with_addr(addr, size);
+    // void* ret = escort_malloc_with_addr(addr, size);
+    void* ret = _escort_internal_malloc(size);
   }
 }
 #else // OLD_VERSION does not support recovery functions

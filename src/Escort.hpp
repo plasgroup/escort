@@ -35,13 +35,13 @@ namespace {
   }
   
   template<class T, typename... Types>
-  T* pnew(Types... args) {
+  T* pnew(Types&&... args) {
     std::size_t object_size = sizeof(T);
     if(object_size % ESCORT_CACHELINE_SIZE != 0) {
       object_size = (object_size/ESCORT_CACHELINE_SIZE + 1) * ESCORT_CACHELINE_SIZE;
     }
     T* ret = (T*) escort_malloc(object_size);
-    new (ret) T(args...);
+    new (ret) T(std::forward<Types>(args)...);
     if((void*) ret == (void*) 0x7f9f164d9fc8)
       std::cout << "ret: " << ret << ", size: " << object_size << std::endl;
     return ret;

@@ -16,7 +16,7 @@ nvmconfig_t::nvmconfig_t(const char* nvm_path, std::size_t heap_size) {
 
   check_dirty();
   
-  create_area(2*heap_size);
+  create_area(heap_size);
 
   // _tmp_space points to the head pointer of log area
   // std::size_t offset_tmp_space =

@@ -24,18 +24,18 @@ public:
   }
   
   inline bool is_set(std::size_t index) const {
-    assert(index < _size);
+    // assert(index < _size);
     return _bitmap[index];
   }
   
   inline void set(std::size_t index) {
-    assert(index < _size);
+    // assert(index < _size);
     assert(!_bitmap[index]); // this assertion works when program is DRF
     _bitmap[index] = true;
   }
   
   inline void clear(std::size_t index) {
-    assert(index < _size);
+    // assert(index < _size);
     _bitmap[index] = false;
   }
   
