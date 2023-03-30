@@ -136,6 +136,7 @@ public:
   inline bool is_empty() const { return _size == 0; }
   void flush();
   void clear();
+  const std::size_t size() const { return _size; }
 };
 
 class Escort::plog_management_t{}; // do not use this class object

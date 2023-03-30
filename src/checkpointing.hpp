@@ -94,7 +94,12 @@ public:
       is_unit = false;
 
     if(is_unit) {
+#ifndef OLD_VERSION
       _log = NEW(plog_t);
+#else
+      _log = reinterpret_cast<plog_t*>(gv::NVM_config->malloc(sizeof(plog_t)));
+      new(_log) plog_t();
+#endif
     } else {    
       _workers = reinterpret_cast<cpworker_t**>(std::malloc(sizeof(cpworker_t*) * checkpointing_num));
       for(int i = 0; i < checkpointing_num; i++)

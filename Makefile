@@ -1,8 +1,7 @@
 COMPILER  := g++
-CPPFLAGS  := -g3 -pthread -mclwb -std=c++2a -O3 -shared -fPIC #-DNDEBUG
-#CPPFLAGS  += -DOLD_VERSION
-# CPPFLAGS += -DDEBUG_MODE
-LDFLAGS   := -ljemalloc -L./jemalloc/lib -lhwloc
+CPPFLAGS  := -g3 -pthread -mclwb -std=c++2a -O3 -shared -fPIC
+CPPFLAGS  += -DMEASURE -DNDEBUG #-DOLD_VERSION
+LDFLAGS   := -ljemalloc -L./src/jemalloc/lib -lhwloc
 
 SRCDIR      := src
 NVMDIR      := $(SRCDIR)/nvm
