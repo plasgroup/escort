@@ -1,17 +1,49 @@
 # Escort
+
 ## How to build
+
 ### Required
-This repository depends on `libhwloc`, `libjemalloc`, and `libpthread`.
+This repository depends on `libhwloc` and `libpthread`.
 
-### command
-~~~
+### Step 1. jemalloc
+
+Escort uses a customized jemalloc. The following command compiles jemalloc.
+
+```
+$ cd jemalloc
+$ ./autogen.sh
+$ ./configure --with-jemalloc-prefix=_escort_internal_
 $ make
-~~~
+```
 
-Makefile creates `bin/libescort.so`. 
-If `bin/`, `obj/` direcotries do not exist, 
-these direcotries will be created.
-And if `jemalloc` hasn't been built yet, jemalloc libraries will be created.
+`make install` is not required for benchmarking.  Benchmark script sets
+library paths in environment variables.
+
+### Step 2. escort
+
+Just typing `make` creates escort library: `bin/libescort.so`
+
+```
+$ make
+```
+
+## Test
+
+In `test` directory, execute the following command.
+
+```
+./run.sh <NVM file prefix>
+```
+
+<NVM file prefix> is a prefix of the paths of the files for NVM heap
+and metadata. They should be in NVM in real use. For the test,
+they can be in a normal disk.
+
+Remark that this test script creates files up to 50 GB in total.
+
+## Benchmark
+
+TODO
 
 ## API
 Escort shows APIs below(you can check the attributes of each API at `src/Escort.hpp`)
