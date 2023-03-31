@@ -3,14 +3,16 @@
 #include "./test.hpp"
 
 int main(int argc, char* argv[]) {
-  if(argc != 2)
-    std::cerr << "The execution format is different" << std::endl;
+  if(argc != 3)
+    std::cerr << "main <NVM file path> <test number>" << std::endl;
 
-  bool is_recovery = escort_is_recovery("/mnt/pmem/test");
-  escort_init("/mnt/pmem/test", 1, is_recovery);
+  char* nvm_file_path = argv[1];
+
+  bool is_recovery = escort_is_recovery(nvm_file_path);
+  escort_init(nvm_file_path, 1, is_recovery);
   escort_thread_init();
 
-  int op = atoi(argv[1]);
+  int op = atoi(argv[2]);
   switch(op) {
   case 0:
     exec_list_single();

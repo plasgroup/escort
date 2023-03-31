@@ -1,6 +1,6 @@
 #!/bin/bash
 
-file_name="/mnt/pmem/test"
+file_name=$1
 
 dd if=/dev/zero of=$file_name bs=1G count=30
 dd if=/dev/zero of=$file_name\_redolog bs=1G count=8
