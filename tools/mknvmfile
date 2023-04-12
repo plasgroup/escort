@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ x"$1" = x ]; then
+   echo mknvmfile "<prefix>" [heap size in GB]
+   exit 1
+fi
+   
+file_name=$1
+heap_size=${2:-30}
+
+dd if=/dev/zero of=$file_name bs=1G count=$heap_size
+dd if=/dev/zero of=${file_name}_redolog bs=1G count=8
+dd if=/dev/zero of=${file_name}_allocatorlog bs=1G count=8

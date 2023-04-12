@@ -43,6 +43,10 @@ Remark that this test script creates files up to 50 GB in total.
 
 ## Benchmark
 
+Benchmark programs require additional libraries: `libevent`
+
+
+
 TODO
 
 ## API
