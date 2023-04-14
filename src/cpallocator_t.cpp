@@ -59,6 +59,9 @@ void Escort::cpallocator_t::checkpointing(std::vector<userthreadctx_t*>& ctx_arr
     }
     _mm_sfence();
     allocatorlog.clear();
+#ifdef DEBUG
+    printf("clear allocatorlog %p\n", &allocatorlog);
+#endif /* DEBUG */
 #else
     auto log_size = allocatorlog->size();
     if(log_size == 0) continue;

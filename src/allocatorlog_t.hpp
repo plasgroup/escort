@@ -3,6 +3,7 @@
 
 #include <list>
 #include <vector>
+#include <thread>
 
 #include "Escort.hpp"
 #include "globalEscort.hpp"
@@ -31,10 +32,29 @@ public:
     std::size_t _max_size;
     epoch_t _epoch;
   public:
-    log_block_t():_size(0), _max_size(ALLOCATOR_LOG_BLOCK_NUM) {}
+    log_block_t():_size(0), _max_size(ALLOCATOR_LOG_BLOCK_NUM) {
+#ifdef DEBUG
+      _owner_alloc = NULL;
+      printf("init %p\n", this);
+#endif /* DEBUG */
+    }
     inline std::size_t size() const { return _size; }
     inline epoch_t epoch() const { return _epoch; }
     inline void set_epoch(epoch_t epoch){ _epoch = epoch; }
+#ifdef DEBUG
+    allocatorlog_t *_owner_alloc;
+    std::thread::id _owner_thread;
+    inline void set_owner(allocatorlog_t* owner_alloc,
+			  std::thread::id owner_thread) {
+      _owner_alloc = owner_alloc;
+      _owner_thread = owner_thread;
+    }
+    inline void verify_owner(allocatorlog_t* owner_alloc,
+			     std::thread::id owner_thread) {
+      assert(_owner_alloc == owner_alloc);
+      assert(_owner_thread == owner_thread);
+    }
+#endif /* DEBUG */
     inline const entry_t* entries() const { return reinterpret_cast<const entry_t*>(&_entries); }
     void flush() {
       _mm_clwb(&_size);
@@ -92,8 +112,14 @@ public:
     
     for(int i = 0; i < num_blocks; i++) {
       allocatorlog_block_t* block = reinterpret_cast<allocatorlog_block_t*>(log_area);
+#ifdef DEBUG
+      block->_owner_alloc = NULL;
+#endif /* DEBUG */
       new(block) allocatorlog_block_t();
       _free_block_list.push_back(reinterpret_cast<allocatorlog_block_t*>(log_area));
+#ifdef DEBUG
+      assert(block->_owner_alloc == NULL);
+#endif /* DEBUG */
       log_area += sizeof(allocatorlog_block_t);
     }
   }
@@ -104,11 +130,18 @@ public:
     allocatorlog_block_t* log_block = _free_block_list.back();
     _free_block_list.pop_back();
     _used_block_list.push_back(log_block);
+#ifdef DEBUG
+    assert(log_block->_owner_alloc == NULL);
+#endif /* DEBUG */
     return log_block;
   }
   
   inline void push(allocatorlog_block_t* log_block) {
     std::lock_guard<std::mutex> lock(_mtx);
+#ifdef DEBUG
+    printf("alloclog free %p  (%p) ep = %lx (GEP=%lx)\n", log_block, log_block->_owner_alloc, log_block->epoch(), GLOBAL_EPOCH);
+    log_block->_owner_alloc = NULL;
+#endif /* DEBUG */
     _free_block_list.push_back(log_block);
     _used_block_list.remove(log_block);
   }
