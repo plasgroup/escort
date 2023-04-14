@@ -120,7 +120,7 @@ void nvmconfig_t::create_allocatorlog_area(const char* allocatorlog_path) {
 			 S_IRUSR | S_IWUSR);
   assert(_nvm_allocatorlog_fd >= 0);
   _allocatorlog_area_size = std::filesystem::file_size(allocatorlog_path);
-  _allocatorlog_address = mmap(NULL, _allocatorlog_area_size, PROT_WRITE|PROT_READ, MMAP_FLAG, _nvm_redolog_fd, 0);
+  _allocatorlog_address = mmap(NULL, _allocatorlog_area_size, PROT_WRITE|PROT_READ, MMAP_FLAG, _nvm_allocatorlog_fd, 0);
   if(_allocatorlog_address == MAP_FAILED)
     DEBUG_ERROR("cannot create allocatorlog area", allocatorlog_path);
 
