@@ -7,7 +7,7 @@ namespace gv = Escort::GlobalVariable;
 
 void Escort::cpallocator_t::check_valid(std::vector<userthreadctx_t*>& ctx_array) {
   auto epoch = GLOBAL_EPOCH;
-  auto prev  = static_cast<bool>(epoch & 0x1);
+  auto prev  = static_cast<bool>((Epoch(epoch) - 1) & 0x1);
   for(auto ctx: ctx_array) {
     auto allocatorlog = ctx->allocatorlog(prev);
     //#ifndef OLD_VERSION
@@ -41,7 +41,7 @@ void Escort::cpallocator_t::check_valid(std::vector<userthreadctx_t*>& ctx_array
 
 void Escort::cpallocator_t::checkpointing(std::vector<userthreadctx_t*>& ctx_array) {
   auto epoch = GLOBAL_EPOCH;
-  auto prev  = static_cast<bool>(epoch & 0x1);
+  auto prev  = static_cast<bool>((Epoch(epoch) - 1) & 0x1);
   for(auto ctx: ctx_array) {
     auto allocatorlog = ctx->allocatorlog(prev);
     //#ifndef OLD_VERSION
