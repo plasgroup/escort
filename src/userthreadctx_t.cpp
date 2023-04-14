@@ -19,6 +19,7 @@ inline void* userthreadctx_t::malloc_with_create_log(std::size_t size) {
   if(epoch == 0) {
     is_out_of_transaction = true;
     begin_op();
+    epoch = get_epoch(std::memory_order_relaxed);
   }
 
   // void* ret = _escort_internal_mallocx(size, MALLOCX_ARENA(1));
@@ -45,6 +46,7 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
   if(epoch == 0) {
     is_out_of_transaction = true;
     begin_op();
+    epoch = get_epoch(std::memory_order_relaxed);
   }
 
   bool curr = static_cast<bool>(epoch & 0x1);
