@@ -31,7 +31,7 @@ inline void* userthreadctx_t::malloc_with_create_log(std::size_t size) {
     gv::ByteMap[curr]->reverse(index);
   } else {
     gv::ByteMap[curr]->set(index);
-    _allocatorlog[curr]->append({ret, size}, epoch);
+    _allocatorlog[curr]->append({ret, size}, Epoch(epoch));
   }
   
   if(is_out_of_transaction) {
@@ -60,7 +60,7 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
     gv::ByteMap[curr]->reverse(index);
   } else {
     gv::ByteMap[curr]->set(index);
-    _allocatorlog[curr]->append({addr, size}, epoch);
+    _allocatorlog[curr]->append({addr, size}, Epoch(epoch));
   }
   
   // this if statement considers that
