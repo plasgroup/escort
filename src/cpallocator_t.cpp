@@ -9,10 +9,10 @@ void Escort::cpallocator_t::check_valid(std::vector<userthreadctx_t*>& ctx_array
   auto epoch = GLOBAL_EPOCH;
   auto prev  = static_cast<bool>((Epoch(epoch) - 1) & 0x1);
   for(auto ctx: ctx_array) {
-    auto allocatorlog = ctx->allocatorlog(prev);
+    auto& allocatorlog = ctx->allocatorlog(prev);
     //#ifndef OLD_VERSION
 #if 1
-    auto block_list  = allocatorlog.block_list();
+    auto& block_list  = allocatorlog.block_list();
     for(auto block: block_list) {
       const std::size_t size = block->size();
       auto entries = block->entries();
@@ -43,10 +43,10 @@ void Escort::cpallocator_t::checkpointing(std::vector<userthreadctx_t*>& ctx_arr
   auto epoch = GLOBAL_EPOCH;
   auto prev  = static_cast<bool>((Epoch(epoch) - 1) & 0x1);
   for(auto ctx: ctx_array) {
-    auto allocatorlog = ctx->allocatorlog(prev);
+    auto& allocatorlog = ctx->allocatorlog(prev);
     //#ifndef OLD_VERSION
 #if 1
-    auto block_list = allocatorlog.block_list();
+    auto& block_list = allocatorlog.block_list();
     for(auto block: block_list) {
       const std::size_t size = block->size();
       auto entries = block->entries();
