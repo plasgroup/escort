@@ -22,7 +22,7 @@ namespace Escort {
     void* malloc_with_create_log(std::size_t size);
     void free_with_create_log(void* addr, std::size_t size);
   public:
-    userthreadctx_t() {
+    userthreadctx_t() : _epoch(0) {
       for(int i = 0; i < 2; i++) {
 	_addrlist[i] = NEW(addrlist_t);
 	_allocatorlog[i] = NEW(allocatorlog_t);
