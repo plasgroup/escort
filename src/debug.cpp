@@ -1,3 +1,5 @@
+#include "../config.h"
+
 #include "debug.hpp"
 
 namespace Escort {

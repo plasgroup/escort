@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include "../config.h"
+
 #include "userthreadctx_t.hpp"
 #include "debug.hpp"
 #include "Escort.hpp"
@@ -7,8 +9,6 @@
 #include "bytemap_t.hpp"
 #include "cacheline_t.hpp"
 #include "roottable_t.hpp"
-
-#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 using namespace Escort;
 namespace gv = Escort::GlobalVariable;

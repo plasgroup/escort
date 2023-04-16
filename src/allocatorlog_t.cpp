@@ -1,3 +1,5 @@
+#include "../config.h"
+
 #include "allocatorlog_t.hpp"
 
 namespace gv = Escort::GlobalVariable;

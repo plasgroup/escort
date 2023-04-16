@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <x86intrin.h>
 
+#include "../config.h"
+
 #include "checkpointing.hpp"
 #include "userthreadctx_t.hpp"
 #include "bitmap_t.hpp"

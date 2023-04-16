@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include "../config.h"
+
 #include "Escort.hpp"
 #include "globalEscort.hpp"
 #include "userthreadctx_t.hpp"

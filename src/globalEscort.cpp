@@ -1,3 +1,5 @@
+#include "../config.h"
+
 #include "globalEscort.hpp"
 #include "Escort.hpp"
 #include "debug.hpp"

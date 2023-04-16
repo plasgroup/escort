@@ -3,7 +3,7 @@ CPPFLAGS  := -g3 -pthread -mclwb -std=c++2a -shared -fPIC
 CPPFLAGS  += -DMEASURE #-DOLD_VERSION
 CPPFLAGS_OPT += -O3 -DNDEBUG
 CPPFLAGS_DBG += -O0 -DDEBUG
-LDFLAGS   := -ljemalloc -L./jemalloc/lib -lhwloc
+LDFLAGS   := -ljemallocescort -L./jemalloc/lib -lhwloc
 
 SRCDIR      := src
 NVMDIR      := $(SRCDIR)/nvm
@@ -44,3 +44,5 @@ $(OBJDIR)/%_dbg.o: %.cpp
 clean:
 	rm -rf $(OBJDIR)/* $(TARGETDIR)/*
 	rm -rf *~ $(SRCDIR)/*~ $(NVMDIR)/*~
+
+

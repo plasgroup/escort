@@ -1,13 +1,13 @@
 #include <cstring>
 
+#include "../config.h"
+
 #include "recovery.hpp"
 #include "globalEscort.hpp"
 #include "plog_t.hpp"
 #include "allocatorlog_t.hpp"
 #include "bytemap_t.hpp"
 #include "nvm/config.hpp"
-
-#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 namespace gv = Escort::GlobalVariable;
 

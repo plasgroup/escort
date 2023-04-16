@@ -1,3 +1,5 @@
+#include "../config.h"
+
 #include "init.hpp"
 #include "roottable_t.hpp"
 #include "bitmap_t.hpp"
@@ -6,8 +8,6 @@
 #include "allocatorlog_t.hpp"
 #include "checkpointing.hpp"
 #include "debug.hpp"
-
-#include "../jemalloc/include/jemalloc/jemalloc.h"
 
 namespace gv = Escort::GlobalVariable;
 

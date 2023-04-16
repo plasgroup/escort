@@ -7,12 +7,24 @@ This repository depends on `libhwloc` and `libpthread`.
 
 ### Step 1. jemalloc
 
-Escort uses a customized jemalloc. The following command compiles jemalloc.
+Escort uses a customized jemalloc. Fill in the /jemalloc submodule
+and build required libraries by the following command:
+
+```
+tools/build-jemalloc.sh
+```
+
+This command generates
+
+  * jemalloc/lib/libjemallocescort.so and
+  * jemalloc/lib/libjemallocescortdbg.so (with debugging facility enabled).
+
+Alternatively the following command compiles jemalloc.
 
 ```
 $ cd jemalloc
 $ ./autogen.sh
-$ ./configure --with-jemalloc-prefix=_escort_internal_
+$ ./configure --with-jemalloc-prefix=_escort_internal_ --disable-cxx --with-install-suffix=escort
 $ make
 ```
 
@@ -21,11 +33,14 @@ library paths in environment variables.
 
 ### Step 2. escort
 
-Just typing `make` creates escort library: `bin/libescort.so`
+Build `bin/libescort.so` and `bin/libescortdbg.so`.
 
 ```
 $ make
 ```
+
+If jemalloc is in a different location, modify `config.h` so that it can
+include jemallocescort.h.
 
 ## Test
 
@@ -43,8 +58,8 @@ Remark that this test script creates files up to 50 GB in total.
 
 ## Benchmark
 
-Benchmark programs require additional libraries: `libevent`
-
+Benchmark programs require additional libraries: `libevent` and `libjemalloc`.
+Note that this `libjemalloc` is a standard one, not `libjemallocescort.so`.
 
 
 TODO

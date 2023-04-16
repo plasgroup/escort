@@ -1,3 +1,5 @@
+#include "../config.h"
+
 #include "cpallocator_t.hpp"
 #include "allocatorlog_t.hpp"
 #include "userthreadctx_t.hpp"

@@ -1,3 +1,5 @@
+#include "../config.h"
+
 #include "globalEscort.hpp"
 #include "deallocator_t.hpp"
 #include "userthreadctx_t.hpp"
