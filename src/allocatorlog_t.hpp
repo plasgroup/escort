@@ -128,6 +128,10 @@ public:
     std::lock_guard<std::mutex> lock(_mtx);
     assert(_free_block_list.size() > 0);
     allocatorlog_block_t* log_block = _free_block_list.back();
+    if (log_block == NULL) {
+      fprintf(stderr, "allocator log overflow\n");
+      exit(1);
+    }
     _free_block_list.pop_back();
     _used_block_list.push_back(log_block);
 #ifdef DEBUG
