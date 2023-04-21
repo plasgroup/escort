@@ -42,12 +42,20 @@ namespace Escort {
     std::uint64_t*  _user_num_addr;
     
     std::size_t _nvm_size;
-    std::size_t _redolog_area_size, _allocatorlog_area_size;
+    std::size_t _redolog_area_size;
+#ifdef SAVE_ALLOCATOR
+    std::size_t _allocatorlog_area_size;
+#endif /* SAVE_ALLOCATOR */
     int _nvm_fd;
-    int _nvm_redolog_fd, _nvm_allocatorlog_fd;
+    int _nvm_redolog_fd;
+#ifdef SAVE_ALLOCATOR
+    int _nvm_allocatorlog_fd;
+#endif /* SAVE_ALLOCATOR */
     void* _start_address;        // for unmap
     void* _redolog_address;       // for unmap
+#ifdef SAVE_ALLOCATOR
     void* _allocatorlog_address; // for unmap
+#endif /* SAVE_ALLOCATOR */
 
     std::mutex _mtx_malloc;
     bool _is_dirty; // for recovery
@@ -55,7 +63,9 @@ namespace Escort {
     void recovery_heap() {} // under construction
     void create_area(std::size_t heap_size);
     void create_redolog_area(const char* redolog_path);
+#ifdef SAVE_ALLOCATOR
     void create_allocatorlog_area(const char* allocatorlog_path);
+#endif /* SAVE_ALLOCATOR */
     void check_dirty();
     std::intptr_t open_nvmfile(const char* nvm_path);
   public:
@@ -83,7 +93,9 @@ namespace Escort {
     }
 
     inline void* redolog_area() const { return _redolog_address; }
+#ifdef SAVE_ALLOCATOR
     inline void* allocatorlog_area() const { return _allocatorlog_address; }
+#endif /* SAVE_ALLOCATOR */
     
     inline bool is_dirty() const {
       return _is_dirty;

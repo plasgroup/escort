@@ -25,9 +25,11 @@ nvmconfig_t::nvmconfig_t(const char* nvm_path, std::size_t heap_size) {
 
   std::string redolog_path = std::string(nvm_path) + "_redolog";
   create_redolog_area(redolog_path.c_str());
+#ifdef SAVE_ALLOCATOR
   std::string allocatorlog_path
     = std::string(nvm_path) + "_allocatorlog";
   create_allocatorlog_area(allocatorlog_path.c_str());
+#endif /* SAVE_ALLOCATOR */
 }
 
 nvmconfig_t::~nvmconfig_t() {
@@ -115,6 +117,7 @@ void nvmconfig_t::create_redolog_area(const char* redolog_path) {
   DEBUG_PRINT("_redolog_address: ", _redolog_address);
 }
 
+#ifdef SAVE_ALLOCATOR
 void nvmconfig_t::create_allocatorlog_area(const char* allocatorlog_path) {
   _nvm_allocatorlog_fd = open(allocatorlog_path, O_CREAT | O_RDWR,
 			 S_IRUSR | S_IWUSR);
@@ -126,3 +129,4 @@ void nvmconfig_t::create_allocatorlog_area(const char* allocatorlog_path) {
 
   DEBUG_PRINT("_allocatorlog_address: ", _allocatorlog_address);
 }
+#endif /* SAVE_ALLOCATOR */

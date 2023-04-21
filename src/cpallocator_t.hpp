@@ -1,3 +1,5 @@
+#ifdef SAVE_ALLOCATOR
+
 #ifndef CPALLOCATOR_T_HPP
 #define CPALLOCATOR_T_HPP
 
@@ -20,3 +22,5 @@ public:
   
 };
 #endif
+
+#endif /* SAVE_ALLOCATOR */

@@ -32,8 +32,10 @@ void Escort::init::init_bitmap() {
 
 void Escort::init::init_manager() {
   gv::Plog_Management = NEW(plog_management_t);
+#ifdef SAVE_ALLOCATOR
   gv::Allocatorlog_Management
     = NEW(allocatorlog_management_t, 8192 * 4);
+#endif /* SAVE_ALLOCATOR */
 }
 
 void Escort::init::init_checkpointing_thread(std::uint32_t checkpointing_num) {

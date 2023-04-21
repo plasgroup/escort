@@ -1,3 +1,5 @@
+#ifdef SAVE_ALLOCATOR
+
 #include "../config.h"
 
 #include "cpallocator_t.hpp"
@@ -87,3 +89,4 @@ void Escort::cpallocator_t::checkpointing(std::vector<userthreadctx_t*>& ctx_arr
   _mm_sfence();
 }
 
+#endif /* SAVE_ALLOCATOR */

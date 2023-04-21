@@ -111,7 +111,11 @@ void escort_get_current_status(int* epoch, int* phase,
   *epoch = (int) Escort::Epoch(GLOBAL_EPOCH);
   *phase = (int) Escort::get_phase(GLOBAL_EPOCH);
   *num_user_threads = Escort::GlobalVariable::CpMaster->get_num_user_threads();
+#ifdef SAVE_ALLOCATOR
   *num_used_alloc_logs =
     Escort::GlobalVariable::Allocatorlog_Management->get_num_used_alloc_logs();
+#else /* SAVE_ALLOCATOR */
+  *num_used_alloc_logs = 0;
+#endif /* SAVE_ALLOCATOR */
 }
 

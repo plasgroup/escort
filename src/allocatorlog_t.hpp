@@ -1,3 +1,5 @@
+#ifdef SAVE_ALLOCATOR
+
 #ifndef ALLOCATORLOG_T_HPP
 #define ALLOCATORLOG_T_HPP
 
@@ -216,3 +218,5 @@ public:
 };
 #endif
 #endif
+
+#endif /* SAVE_ALLOCATOR */

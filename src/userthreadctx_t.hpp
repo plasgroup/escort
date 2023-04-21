@@ -16,7 +16,9 @@ namespace Escort {
     std::atomic<uint64_t> _epoch;
     addrlist_t *_addrlist[2];         // PLACE ON DRAM
     plog_t *_log;                     // PLACE ON NVM, _log is manager of log contents
+#ifdef SAVE_ALLOCATOR
     allocatorlog_t *_allocatorlog[2]; // PLACE ON NVM, _allocatorlog is manager of log contents
+#endif /* SAVE_ALLOCATOR */
     std::list<void*> _delay_dealloc_list[2];
   private:
     void* malloc_with_create_log(std::size_t size);
@@ -25,7 +27,9 @@ namespace Escort {
     userthreadctx_t() : _epoch(0) {
       for(int i = 0; i < 2; i++) {
 	_addrlist[i] = NEW(addrlist_t);
+#ifdef SAVE_ALLOCATOR
 	_allocatorlog[i] = NEW(allocatorlog_t);
+#endif /* SAVE_ALLOCATOR */
       }
 #ifndef OLD_VERSION
       _log = NEW(plog_t);
@@ -60,7 +64,9 @@ namespace Escort {
     inline addrlist_t* list(bool id) const { return _addrlist[id]; }
 #endif
     inline plog_t& log() const { return *_log; }
+#ifdef SAVE_ALLOCATOR
     inline allocatorlog_t& allocatorlog(bool id = 0) const { return *_allocatorlog[id]; }
+#endif /* SAVE_ALLOCATOR */
     inline const std::list<void*>& dealloc_list(bool id = 0) const { return _delay_dealloc_list[id]; }
     inline void clear_dealloc_list(bool id = 0) {
       _delay_dealloc_list[id].clear();

@@ -1,3 +1,5 @@
+#ifdef SAVE_ALLOCATOR
+
 #include "../config.h"
 
 #include "allocatorlog_t.hpp"
@@ -49,3 +51,5 @@ void Escort::allocatorlog_t::clear() {
   }
   _mm_sfence();
 }
+
+#endif /* SAVE_ALLOCATOR */

@@ -6,11 +6,11 @@ CONFIG_DEBUG="$CONFIG --with-install-suffix=escortdbg --enable-debug"
 
 cd jemalloc
 
-echo ./configure $CONFIG_RELEASE
-#make clean
-#make -j
+./configure $CONFIG_RELEASE
+make clean
+make -j
 
-#./configure $CONFIG_DEBUG
-#make clean
-#make -j
+./configure $CONFIG_DEBUG
+make clean
+make -j
 

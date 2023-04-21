@@ -21,7 +21,9 @@ namespace Escort {
     std::uint32_t EpochLength = 100;
     cpmaster_t *CpMaster = nullptr;
     plog_management_t *Plog_Management = nullptr;
+#ifdef SAVE_ALLOCATOR
     allocatorlog_management_t *Allocatorlog_Management = nullptr;
+#endif /* SAVE_ALLOCATOR */
   }
   
   namespace LocalVariable {

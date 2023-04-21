@@ -14,6 +14,7 @@ using namespace Escort;
 namespace gv = Escort::GlobalVariable;
 
 inline void* userthreadctx_t::malloc_with_create_log(std::size_t size) {
+#ifdef SAVE_ALLOCATOR
   bool is_out_of_transaction = false;
   epoch_t epoch = get_epoch(std::memory_order_relaxed);
   if(epoch == 0) {
@@ -38,9 +39,13 @@ inline void* userthreadctx_t::malloc_with_create_log(std::size_t size) {
     end_op();
   }
   return ret;
+#else /* SAVE_ALLOCATOR */
+  return _escort_internal_malloc(size);
+#endif /* SAVE_ALLOCATOR */
 }
 
 inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) {
+#ifdef SAVE_ALLOCATOR
   bool is_out_of_transaction = false;
   epoch_t epoch = get_epoch(std::memory_order_relaxed);
   if(epoch == 0) {
@@ -79,6 +84,22 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
   if(is_out_of_transaction) {
     end_op();
   }
+#else /* SAVE_ALLOCATOR */
+  epoch_t epoch = get_epoch(std::memory_order_relaxed);
+  if(epoch == 0) {
+    begin_op();
+    free_with_create_log(addr, size);
+    end_op();
+  } else {
+    bool curr = static_cast<bool>(epoch & 0x1);
+    if(get_phase(epoch) == epoch_phase::Multi_Epoch_Existence) {
+      DEBUG_PRINT("free operation delays");
+      _delay_dealloc_list[curr].push_back(addr);
+    } else {
+      _escort_internal_free(addr);
+    }
+  }
+#endif /* SAVE_ALLOCATOR */
 }
 
 void* userthreadctx_t::malloc(std::size_t size){

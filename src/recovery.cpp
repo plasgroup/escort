@@ -52,6 +52,7 @@ void Escort::recovery::copy() {
   }
 }
 
+#ifdef SAVE_ALLOCATOR
 void Escort::recovery::internal::replay_allocator_logs() {
   auto all_allocatorlog_list =
     gv::Allocatorlog_Management->free_list();
@@ -85,6 +86,7 @@ void Escort::recovery::apply_metadata() {
     void* ret = _escort_internal_malloc(size);
   }
 }
+#endif /* SAVE_ALLOCATOR */
 #else // OLD_VERSION does not support recovery functions
 void Escort::recovery::replay_redo_logs() {}
 void Escort::recovery::copy() {}

@@ -39,8 +39,10 @@ private:
   bool is_unit = false;
   // deallocator
   deallocator_t *_deallocator = nullptr;
+#ifdef SAVE_ALLOCATOR
   // checkpointing threads of allocator logs
   cpallocator_t *_cpallocator = nullptr;
+#endif /* SAVE_ALLOCATOR */
   // user thread ctx;
   std::vector<userthreadctx_t*> _ctx_array;
   std::vector<userthreadctx_t*> _ctx_delete_array[4];
@@ -69,6 +71,7 @@ private:
   inline void join_deallocator() {
     _deallocator->join();
   }
+#ifdef SAVE_ALLOCATOR
   // for checkpointing of allocator log
   inline void run_check_valid_cpallocator() {
     _cpallocator->run_check_valid(_ctx_array);
@@ -79,6 +82,7 @@ private:
   inline void join_cpallocator() {
     _cpallocator->join();
   }
+#endif /* SAVE_ALLOCATOR */
   // for waiting user threads
   inline bool has_execute_right() {
     bool expected = false;
@@ -107,7 +111,9 @@ public:
     }
 
     _deallocator = NEW(deallocator_t);
+#ifdef SAVE_ALLOCATOR
     _cpallocator = NEW(cpallocator_t);
+#endif /* SAVE_ALLOCATOR */
 
     _has_execute_right.store(false, std::memory_order_release);
     _num_wait_threads.store(0, std::memory_order_release);

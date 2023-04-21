@@ -16,14 +16,20 @@ namespace Escort {
   class bytemap_nvm_t;
   class roottable_t;
   class plog_t;
+#ifdef SAVE_ALLOCATOR
   class allocatorlog_t;
+#endif /* SAVE_ALLOCATOR */
   class addrlist_t;
   class cacheline_t;
+#ifdef SAVE_ALLOCATOR
   class allocatorlog_management_t;
+#endif /* SAVE_ALLOCATOR */
   class plog_management_t;
   class cpmaster_t;
   class deallocator_t;
+#ifdef SAVE_ALLOCATOR
   class cpallocator_t;
+#endif /* SAVE_ALLOCATOR */
   
   using epoch_t = std::uint64_t;
   
@@ -43,7 +49,9 @@ namespace Escort {
     extern std::uint32_t EpochLength;
     extern cpmaster_t *CpMaster;
     extern plog_management_t *Plog_Management;
+#ifdef SAVE_ALLOCATOR
     extern allocatorlog_management_t *Allocatorlog_Management;
+#endif /* SAVE_ALLOCATOR */
   }  
   namespace LocalVariable {
     extern thread_local userthreadctx_t *ctx;

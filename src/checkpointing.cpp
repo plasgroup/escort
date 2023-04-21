@@ -71,14 +71,18 @@ void Escort::cpmaster_t::log_persistence_multi() {
 }
 
 void Escort::cpmaster_t::log_persistence() {
+#ifdef SAVE_ALLOCATOR
   run_check_valid_cpallocator();
+#endif /* SAVE_ALLOCATOR */
   
   if(is_unit)
     log_persistence_unit();
   else
     log_persistence_multi();
   
+#ifdef SAVE_ALLOCATOR
   join_cpallocator();
+#endif /* SAVE_ALLOCATOR */
 }
 
 void Escort::cpmaster_t::replay_redo_log(plog_t& log) {
@@ -130,14 +134,18 @@ void Escort::cpmaster_t::nvm_heap_update_multi() {
   DEBUG_ERROR("under construction");
 }
 void Escort::cpmaster_t::nvm_heap_update() {
+#ifdef SAVE_ALLOCATOR
   run_checkpointing_cpallocator();
+#endif /* SAVE_ALLOCATOR */
   
   if(is_unit)
     nvm_heap_update_unit();
   else
     nvm_heap_update_multi();
 
+#ifdef SAVE_ALLOCATOR
   join_cpallocator();
+#endif /* SAVE_ALLOCATOR */
 }
 
 // cpu_bind() suppose NVM is
