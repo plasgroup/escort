@@ -109,7 +109,7 @@ private:
 public:
   allocatorlog_management_t(size_t num_blocks = 1024) {
     std::intptr_t log_area = reinterpret_cast<std::intptr_t>(gv::NVM_config->allocatorlog_area());
-    
+
     for(int i = 0; i < num_blocks; i++) {
       allocatorlog_block_t* block = reinterpret_cast<allocatorlog_block_t*>(log_area);
 #ifdef DEBUG
@@ -155,6 +155,10 @@ public:
   }
   inline const std::list<allocatorlog_block_t*>& used_list() const {
     return _used_block_list;
+  }
+
+  int get_num_used_alloc_logs() const {
+    return _used_block_list.size();
   }
 };
 #else
@@ -204,6 +208,10 @@ public:
   }
   inline void flush() {
     _mm_clwb(&_size);
+  }
+  
+  int get_num_used_alloc_logs() const {
+    return 1;
   }
 };
 #endif

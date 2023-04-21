@@ -119,6 +119,10 @@ public:
   inline void join() { _thread.join(); }
   void init_userthreadctx(userthreadctx_t* ctx);
   void finalize_userthreadctx(userthreadctx_t* ctx);
+
+  int get_num_user_threads() {
+    return _ctx_array.size();
+  }
 };
 
 #endif

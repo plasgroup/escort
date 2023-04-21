@@ -24,6 +24,9 @@ T* escort_get_root(const char* id) {
 }
 void escort_remove_root(const char* id);
 
+void escort_get_current_status(int* epoch, int* phase,
+			       int* user_threads, int* alloc_log_used);
+
 #define ESCORT_CACHELINE_SIZE 64
 
 namespace {

@@ -104,3 +104,14 @@ void escort_remove_root(const char* id) {
   assert(lv::ctx != nullptr);
   lv::ctx->get_root(id);
 }
+
+void escort_get_current_status(int* epoch, int* phase,
+			       int* num_user_threads, int* num_used_alloc_logs)
+{
+  *epoch = (int) Escort::Epoch(GLOBAL_EPOCH);
+  *phase = (int) Escort::get_phase(GLOBAL_EPOCH);
+  *num_user_threads = Escort::GlobalVariable::CpMaster->get_num_user_threads();
+  *num_used_alloc_logs =
+    Escort::GlobalVariable::Allocatorlog_Management->get_num_used_alloc_logs();
+}
+
