@@ -31,8 +31,10 @@ void escort_init(const char* nvm_path, std::uint32_t checkpointing_num, bool is_
       Escort::recovery::replay_redo_logs();
     
     Escort::recovery::copy();
-    
+
+#ifdef SAVE_ALLOCATOR
     Escort::recovery::apply_metadata();
+#endif /* SAVE_ALLOCATOR */
     
     gv::RootTable = gv::NVM_config->get_roottable();
     DEBUG_PRINT("roottable:", gv::RootTable);
