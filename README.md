@@ -64,6 +64,11 @@ Note that this `libjemalloc` is a standard one, not `libjemallocescort.so`.
 
 TODO
 
+## Compile options
+
+  * ESCORT_PROF: Enalbe profiling feature that may affect preformance.
+  * MEASURE: Enable measurement for ops/sec.
+
 ## API
 Escort shows APIs below(you can check the attributes of each API at `src/Escort.hpp`)
 - `Escort_init`
