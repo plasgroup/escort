@@ -23,6 +23,10 @@ namespace Escort {
   private:
     void* malloc_with_create_log(std::size_t size);
     void free_with_create_log(void* addr, std::size_t size);
+#ifdef ESCORT_PROF
+  public:
+    int _delay_dealloc_list_size[2] = {0, 0};
+#endif /* ESCORT_PROF */
   public:
     userthreadctx_t() : _epoch(0) {
       for(int i = 0; i < 2; i++) {
@@ -70,6 +74,9 @@ namespace Escort {
     inline const std::list<void*>& dealloc_list(bool id = 0) const { return _delay_dealloc_list[id]; }
     inline void clear_dealloc_list(bool id = 0) {
       _delay_dealloc_list[id].clear();
+#ifdef ESCORT_PROF
+      _delay_dealloc_list_size[id] = 0;
+#endif /* ESCORT_PROF */
     }
   };
 }

@@ -108,7 +108,8 @@ void escort_remove_root(const char* id) {
 }
 
 void escort_get_current_status(int* epoch, int* phase,
-			       int* num_user_threads, int* num_used_alloc_logs)
+			       int* num_user_threads, int* num_used_alloc_logs,
+			       int* num_delayed_deallocs)
 {
   *epoch = (int) Escort::Epoch(GLOBAL_EPOCH);
   *phase = (int) Escort::get_phase(GLOBAL_EPOCH);
@@ -119,5 +120,11 @@ void escort_get_current_status(int* epoch, int* phase,
 #else /* SAVE_ALLOCATOR */
   *num_used_alloc_logs = 0;
 #endif /* SAVE_ALLOCATOR */
+#ifdef ESCORT_PROF
+  *num_delayed_deallocs =
+    Escort::GlobalVariable::CpMaster->get_num_delayed_deallocs();
+#else /* ESCORT_PROF */
+  *num_delayed_deallocs = 0;
+#endif /* ESCORT_PROF */
 }
 

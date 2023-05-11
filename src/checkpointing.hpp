@@ -129,6 +129,17 @@ public:
   int get_num_user_threads() {
     return _ctx_array.size();
   }
+
+#ifdef ESCORT_PROF
+  int get_num_delayed_deallocs() {
+    int total = 0;
+    for (auto ctx: _ctx_array) {
+      total += ctx->_delay_dealloc_list_size[0];
+      total += ctx->_delay_dealloc_list_size[1];
+    }
+    return total;
+  }
+#endif /* ESCORT_PROF */
 };
 
 #endif

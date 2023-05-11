@@ -77,6 +77,9 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
      epoch_phase::Multi_Epoch_Existence) { // must delay
     DEBUG_PRINT("free operation delays");
     _delay_dealloc_list[curr].push_back(addr);
+#ifdef ESCORT_PROF
+    _delay_dealloc_list[curr]++;
+#endif /* ESCORT_PROF */
   } else {
     _escort_internal_free(addr);
   }
@@ -95,6 +98,9 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
     if(get_phase(epoch) == epoch_phase::Multi_Epoch_Existence) {
       DEBUG_PRINT("free operation delays");
       _delay_dealloc_list[curr].push_back(addr);
+#ifdef ESCORT_PROF
+      _delay_dealloc_list_size[curr]++;
+#endif /* ESCORT_PROF */
     } else {
       _escort_internal_free(addr);
     }
