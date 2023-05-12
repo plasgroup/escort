@@ -4,3 +4,6 @@
 [submodule "benchmark/escort-montage"]
 	path = benchmark/escort-montage
 	url = git@github.com:plasgroup/escort-montage
+[submodule "ralloc"]
+	path = ralloc
+	url = git@github.com:plasgroup/escort-ralloc.git
