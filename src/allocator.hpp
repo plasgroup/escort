@@ -46,7 +46,7 @@ T* Escort::pm_get_root(uint64_t i)
 #elif defined(ALLOCATOR_JEMALLOC)
 
 inline void* pm_malloc(size_t size) {
-    return _escort_internal_malloc(size);
+    return _escort_internal_mallocx(size, MALLOCX_ARENA(1));
 }
 inline void pm_free(void* ptr) {
     _escort_internal_free(ptr);

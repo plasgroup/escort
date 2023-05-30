@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "metadata.hpp"
+#include "allocator.hpp"
 
 #include "../config.h"
 
@@ -42,7 +43,7 @@ inline void* userthreadctx_t::malloc_with_create_log(std::size_t size) {
   }
   return ret;
 #else /* SAVE_ALLOCATOR */
-  return _escort_internal_malloc(size);
+  return pm_malloc(size);
 #endif /* SAVE_ALLOCATOR */
 }
 
@@ -104,7 +105,7 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
       _delay_dealloc_list_size[curr]++;
 #endif /* ESCORT_PROF */
     } else {
-      _escort_internal_free(addr);
+      pm_free(addr);
     }
   }
 #endif /* SAVE_ALLOCATOR */
@@ -112,7 +113,7 @@ inline void userthreadctx_t::free_with_create_log(void* addr, std::size_t size) 
 
 void* userthreadctx_t::malloc(std::size_t size){
 #ifdef NO_PERSIST_METADATA
-  return _escort_internal_mallocx(size, MALLOCX_ARENA(1));
+  return pm_malloc(size);
 #else
   return malloc_with_create_log(size);
 #endif
@@ -120,7 +121,7 @@ void* userthreadctx_t::malloc(std::size_t size){
 
 void userthreadctx_t::free(void* addr, std::size_t size) {
 #ifdef NO_PERSIST_METADATA
-  _escort_internal_free(addr);
+  pm_free(addr);
 #else
   free_with_create_log(addr, size);
 #endif
