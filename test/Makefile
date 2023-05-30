@@ -6,7 +6,7 @@ LDFLAGS = -L../jemalloc/lib -L../bin -L../ralloc/test -lescortdbg -lralloc -lpth
 
 CFLAGS = -O0 -g
 
-TEST_PROGS = 01_init
+TEST_PROGS = 01_init 02_threadinit
 
 all: $(TEST_PROGS)
 
@@ -19,4 +19,4 @@ $(TEST_PROGS):%:%.o
 main: $(FILES) $(INCLUDES)
 	g++ -o main $(FILES) -lescort -L../bin -lpthread -DKILL_MODE
 clean:
-	rm -f main *.o
+	rm -f main *.o $(TEST_PROGS)

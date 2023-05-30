@@ -6,5 +6,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     escort_init(argv[1]);
+    escort_finalize();
     return 0;
 }

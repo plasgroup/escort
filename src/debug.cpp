@@ -22,9 +22,9 @@ namespace Escort {
 #endif
     }
     void timer_ave(epoch_t epoch) {
-      time_log_persistence /= (epoch-2);
-      time_nvm_heap_update /= (epoch-2);
-      time_checkpointing   /= (epoch-2);
+      time_log_persistence /= (epoch-1);
+      time_nvm_heap_update /= (epoch-1);
+      time_checkpointing   /= (epoch-1);
     }
 
     void add_plog(std::size_t size) {
@@ -40,8 +40,8 @@ namespace Escort {
     }
     
     void plog_ave(epoch_t epoch) {
-      num_plog  /= (epoch-2);
-      num_plog_user = num_plog_user / (epoch-2);
+      num_plog  /= (epoch-1);
+      num_plog_user = num_plog_user / (epoch-1);
     }
     
     void print() {
