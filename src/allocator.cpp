@@ -17,6 +17,11 @@ static void* map_replica_region(uint64_t sb_region_size, void* map_addr)
     int flags =  MAP_PRIVATE|MAP_ANONYMOUS;
     if (map_addr != nullptr)
         flags |= MAP_FIXED;
+    else {
+#warning DEBUG: fix DRAM addrss
+        flags |= MAP_FIXED;
+        map_addr = (void*)0x1000000000000;
+    }
     void* res = mmap(map_addr, sb_region_size, PROT_READ|PROT_WRITE, flags, -1, 0);
     if (res == MAP_FAILED) {
         perror("mmap");

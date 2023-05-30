@@ -1,9 +1,12 @@
 #ifndef PLOG_T_HPP
 #define PLOG_T_HPP
 
+#include <x86intrin.h>
+#include <assert.h>
 #include <cstring>
 #include <vector>
 #include <list>
+#include <mutex>
 
 #include "globalEscort.hpp"
 #include "cacheline_t.hpp"
@@ -71,6 +74,19 @@ private:
   std::list<log_block_t*> _free_block_list;
   std::list<log_block_t*> _used_block_list;
 public:
+#ifdef ALLOCATOR_RALLOC
+  plog_management_t(uintptr_t plog_area_addr, size_t plog_area_size) {
+    int num_blocks = plog_area_size / sizeof(log_block_t);
+    uintptr_t p = plog_area_addr;
+    for (int i = 0; i < num_blocks; i++) {
+      log_block_t* block = reinterpret_cast<log_block_t*>(p);
+      new(block) log_block_t();
+      _free_block_list.push_back(block);
+      p += sizeof(log_block_t);
+      p = (p + CACHE_LINE_SIZE - 1) & ~(CACHE_LINE_SIZE - 1);
+    }
+  }
+#else // ALLOCATOR_RALLOC
   plog_management_t(size_t num_blocks = 1024) {
     std::intptr_t log_area = reinterpret_cast<std::intptr_t>(gv::NVM_config->redolog_area());
     for(int i = 0; i < num_blocks; i++) {
@@ -80,6 +96,7 @@ public:
       log_area += sizeof(log_block_t);
     }
   }
+#endif // ALLOCATOR_RALLOC
 
   inline log_block_t* pop() {
     std::lock_guard<std::mutex> lock(_mtx);

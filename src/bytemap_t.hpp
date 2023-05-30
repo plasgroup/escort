@@ -1,6 +1,8 @@
 #ifndef BYTEMAP_T_HPP
 #define BYTEMAP_T_HPP
 
+#ifndef ALLOCATOR_RALLOC
+
 #include "Escort.hpp"
 #include "globalEscort.hpp"
 #include "debug.hpp"
@@ -94,4 +96,6 @@ public:
   }
 #endif
 };
+
+#endif // ALLOCATOR_RALLOC
 #endif

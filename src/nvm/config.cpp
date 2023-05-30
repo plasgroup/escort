@@ -1,3 +1,5 @@
+#ifndef ALLOCATOR_RALLOC
+
 #include <mutex>
 #include <cstdint>
 #include <cassert>
@@ -130,3 +132,5 @@ void nvmconfig_t::create_allocatorlog_area(const char* allocatorlog_path) {
   DEBUG_PRINT("_allocatorlog_address: ", _allocatorlog_address);
 }
 #endif /* SAVE_ALLOCATOR */
+
+#endif // ALLOCATOR_RALLOC

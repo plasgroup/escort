@@ -1,6 +1,8 @@
 #ifndef NVM_CONFIG_HPP
 #define NVM_CONFIG_HPP
 
+#ifndef ALLOCATOR_RALLOC
+
 #include <filesystem>
 #include <fstream>
 #include <climits>
@@ -152,5 +154,6 @@ namespace Escort {
     }
   };
 }
+#endif // ALLOCATOR_RALLOC
 
 #endif

@@ -1,6 +1,6 @@
 COMPILER  := g++
 CPPFLAGS  := -g3 -pthread -mclwb -std=c++2a -shared -fPIC -DESCORT_PROF
-CPPFLAGS  += -DMEASURE #-DOLD_VERSION
+CPPFLAGS  += -DMEASURE -DALLOCATOR_RALLOC #-DOLD_VERSION
 CPPFLAGS_OPT += -O3 -DNDEBUG
 CPPFLAGS_DBG += -O0 -DDEBUG
 LDFLAGS   := -ljemallocescort -L./jemalloc/lib -lhwloc

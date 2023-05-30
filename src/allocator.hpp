@@ -10,16 +10,17 @@ namespace Escort {
     extern uint64_t sb_region_size;
     extern uint64_t nvm_dram_distance;  // DRAM - NVM
 
-    void* dram_to_nvm(void* dram_ptr);
-    void* nvm_to_dram(void* nvm_ptr);
-    int pm_init(const char* id, uint64_t size);
+    static inline void* dram_to_nvm(void* dram_ptr);
+    static inline void* nvm_to_dram(void* nvm_ptr);
+    
+    int pm_init(const char* id, uint64_t size, void* dram_recovery_base);
     void* pm_malloc(size_t size);
     void pm_free(void* dram_ptr);
     template<class T> T* pm_get_root(uint64_t i);
     void* pm_set_root(void* dram_ptr, uint64_t i);
 }
 
-void* Escort::dram_to_nvm(void* dram_ptr)
+static inline void* Escort::dram_to_nvm(void* dram_ptr)
 {
     if (dram_ptr == nullptr)
         return nullptr;
@@ -27,7 +28,7 @@ void* Escort::dram_to_nvm(void* dram_ptr)
     return (void*) (dram_addr - nvm_dram_distance);
 }
 
-void* Escort::nvm_to_dram(void* nvm_ptr)
+static inline void* Escort::nvm_to_dram(void* nvm_ptr)
 {
     if (nvm_ptr == nullptr)
         return nullptr;

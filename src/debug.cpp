@@ -8,7 +8,7 @@ namespace Escort {
     double time_log_persistence = 0, time_nvm_heap_update = 0;
     double time_checkpointing = 0;
     std::uint64_t num_plog = 0;
-    std::atomic<std::uint64_t> num_plog_user = 0;
+    std::atomic<std::uint64_t> num_plog_user(0);
     void timer_start() {
 #ifdef MEASURE
       time_start = std::chrono::system_clock::now();

@@ -14,6 +14,7 @@ namespace gv = Escort::GlobalVariable;
 #ifndef OLD_VERSION
 void Escort::recovery::replay_redo_logs() {
   DEBUG_PRINT("replay_redo_logs");
+#ifndef ALLOCATOR_RALLOC
   auto all_plog_list =  gv::Plog_Management->free_list();
   for(auto block: all_plog_list) {
     std::size_t size = block->size();
@@ -28,10 +29,12 @@ void Escort::recovery::replay_redo_logs() {
     block->clear();
   }
   _mm_sfence();
+#endif // ALLOCATOR_RALLOC
 }
 
 void Escort::recovery::copy() {
   DEBUG_PRINT("copy");
+#ifndef ALLOCATOR_RALLOC
   auto dram_space = reinterpret_cast<char*>(gv::NVM_config->dram_space());
   auto nvm_space = reinterpret_cast<char*>(gv::NVM_config->nvm_space());
   DEBUG_PRINT("dram_space", (void*) dram_space, "nvm_space", (void*) nvm_space);
@@ -50,6 +53,7 @@ void Escort::recovery::copy() {
       nvm_space++;
     }
   }
+#endif // ALLOCATOR_RALLOC
 }
 
 #ifdef SAVE_ALLOCATOR

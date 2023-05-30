@@ -24,8 +24,12 @@ public:
     plog_t *_log;
   public:
     cpworker_t() {
+#ifdef ALLOCATOR_RALLOC
+      _log = new plog_t();
+#else // ALLOCATOR_RALLOC
       _log = gv::NVM_config->pnew<plog_t>();
-    }
+#endif // ALLOCATOR_RALLOC
+   }
   };
   
 private:

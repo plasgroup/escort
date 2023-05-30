@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include "metadata.hpp"
+
 #include "../config.h"
 
 #include "userthreadctx_t.hpp"
@@ -135,10 +137,10 @@ void userthreadctx_t::begin_op() {
   set_epoch(GLOBAL_EPOCH, std::memory_order_relaxed);
 #else
   do {
-    set_epoch(GLOBAL_EPOCH, std::memory_order_seq_cst);
-  } while(get_epoch(std::memory_order_relaxed) != GLOBAL_EPOCH);
+    set_epoch(get_global_epoch(), std::memory_order_seq_cst);
+  } while(get_epoch(std::memory_order_relaxed) != get_global_epoch());
   if(get_epoch(std::memory_order_relaxed) == 0)
-    std::cout << GLOBAL_EPOCH << std::endl;
+    std::cout << get_global_epoch() << std::endl;
   assert(get_epoch(std::memory_order_relaxed) != 0);
 #endif
 }
@@ -199,14 +201,27 @@ void userthreadctx_t::mark(void* addr, std::size_t size) {
 }
 
 void userthreadctx_t::set_root(const char* id, void* addr) {
+#ifdef ALLOCATOR_RALLOC
+#warning set_root is not implemented
+#else // ALLOCATOR_RALLOC
   assert(get_epoch(std::memory_order_relaxed) != 0);
   gv::RootTable->set(id, addr);
+#endif // ALLOCATOR_RALLOC
 }
 void* userthreadctx_t::get_root(const char* id) {
+#ifdef ALLOCATOR_RALLOC
+#warning get_root is not implemented
+  return nullptr;
+#else // ALLOCATOR_RALLOC
   assert(get_epoch(std::memory_order_relaxed) != 0);
   return gv::RootTable->get(id);
+#endif // ALLOCATOR_RALLOC
 }
 void userthreadctx_t::remove_root(const char* id) {
+#ifdef ALLOCATOR_RALLOC
+#warning remove_root is not implemented
+#else // ALLOCATOR_RALLOC
   assert(get_epoch(std::memory_order_relaxed) != 0);
   return gv::RootTable->remove(id);
+#endif // ALLOCATOR_RALLOC
 }

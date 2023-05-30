@@ -7,6 +7,12 @@
 #include <new>
 #include <iostream>
 
+#ifdef ALLOCATOR_RALLOC
+namespace Escort {
+  class PersistentMetaData;
+}
+#endif // ALLOCATOR_RALLOC
+
 namespace Escort {
   class nvmconfig_t;
   class userthreadctx_t;
@@ -33,18 +39,25 @@ namespace Escort {
   
   using epoch_t = std::uint64_t;
   
-  constexpr std::uint32_t LOG_CACHE_LINE_SIZE = 6;
-  constexpr std::uint32_t CACHE_LINE_SIZE = (1 << LOG_CACHE_LINE_SIZE);
+  constexpr std::uint64_t LOG_CACHE_LINE_SIZE = 6;
+  constexpr std::uint64_t CACHE_LINE_SIZE = (1L << LOG_CACHE_LINE_SIZE);
   extern std::size_t HEAP_SIZE;
   extern std::intptr_t DRAM_BASE;
-  
+
+#ifdef ALLOCATOR_RALLOC  
+  extern PersistentMetaData* persistent_metadata;
+#endif // ALLOCATOR_RALLOC
   namespace GlobalVariable {
+#ifndef ALLOCATOR_RALLOC
     extern nvmconfig_t *NVM_config;
     extern epoch_t *Epoch; // use GLOBALEPOCH (defined below)
+#endif // ALLOCATOR_RALLOC
     extern bitmap_t *BitMap[2];
+#ifndef ALLOCATOR_RALLOC
     extern bytemap_dram_t *ByteMap[2];
     extern bytemap_nvm_t *ByteMap_NVM;
     extern roottable_t *RootTable;
+#endif // ALLOCATOR_RALLOC
     extern bool isPersisting;
     extern std::uint32_t EpochLength;
     extern cpmaster_t *CpMaster;
@@ -82,6 +95,9 @@ namespace Escort {
     return reinterpret_cast<std::intptr_t>(addr) - DRAM_BASE;
   }
 
+#ifdef ALLOCATOR_RALLOC
+  // defined in metadata.hpp
+#else // ALLOCATOR_RALLOC
   template <class T, typename... Types>
   T* default_new(Types... args) {
     T* ret = reinterpret_cast<T*>(std::malloc(sizeof(T)));
@@ -94,9 +110,16 @@ namespace Escort {
     obj->~T();
     std::free(obj);
   }
-}
 
-#define GLOBAL_EPOCH *(Escort::GlobalVariable::Epoch)
+  epoch_t get_global_epoch() {
+    return *Escort::GlobalVariable::Epoch;
+  }
+
+  void set_global_epoch(epoch_t epoch) {
+    *Escort::GlobalVariable::Epoch = epoch;
+  }
+#endif // ALLOCATOR_RALLOC
+}
 
 #ifdef OLD_VERSION
 #define LOG_SIZE 4096*1024*4
@@ -105,9 +128,14 @@ namespace Escort {
 #define INVALID_ENTRY -1
 #endif
 
+#ifdef ALLOCATOR_RALLOC
+#define NEW(t, ...) new t(__VA_ARGS__)
+#define DELETE(obj) delete obj
+#else // ALLOCATOR_RALLOC
 #define NEW(t, ...) ({				\
       Escort::default_new<t>(__VA_ARGS__);})
 #define DELETE(obj) ({				\
       Escort::default_delete(obj);})
+#endif // ALLOCATOR_RALLOC
 
 #endif

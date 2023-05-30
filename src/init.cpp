@@ -11,6 +11,7 @@
 
 namespace gv = Escort::GlobalVariable;
 
+#ifndef ALLOCATOR_RALLOC
 void Escort::init::init_roottable() {
   gv::RootTable = reinterpret_cast<roottable_t*>(_escort_internal_malloc(sizeof(roottable_t)));
   new(gv::RootTable) roottable_t(); // must exist on DRAM heap
@@ -44,3 +45,5 @@ void Escort::init::init_checkpointing_thread(std::uint32_t checkpointing_num) {
   gv::CpMaster = NEW(cpmaster_t, checkpointing_num);
   gv::CpMaster->run();
 }
+#endif // ALLOCATOR_RALLOC
+

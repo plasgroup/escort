@@ -1,5 +1,7 @@
 #include "../config.h"
 
+#include "metadata.hpp"
+
 #include "globalEscort.hpp"
 #include "Escort.hpp"
 #include "debug.hpp"
@@ -9,15 +11,22 @@ namespace Escort {
   // std::uint32_t CACHE_LINE_SIZE = (1 << LOG_CACHE_LINE_SIZE);
   std::size_t HEAP_SIZE = calc_heapsize(8);
   std::intptr_t DRAM_BASE = 0x7f9f14abd000;
-  
+
+#ifdef ALLOCATOR_RALLOC
+  PersistentMetaData* persistent_metadata = nullptr;
+#endif // ALLOCATOR_RALLOC
   namespace GlobalVariable {
+#ifndef ALLOCATOR_RALLOC
     nvmconfig_t *NVM_config = nullptr;
     epoch_t *Epoch = nullptr; // place on NVM
+#endif // ALLOCATOR_RALLOC
     bitmap_t *BitMap[2];
+#ifndef ALLOCATOR_RALLOC
     bytemap_dram_t *ByteMap[2];
     bytemap_nvm_t *ByteMap_NVM;
     roottable_t *RootTable;
-    bool isPersisting = true;
+#endif // ALLOCATOR_RALLOC
+    bool isPersisting = true; // set false to signal checkpointing thread to terminate.
     std::uint32_t EpochLength = 100;
     cpmaster_t *CpMaster = nullptr;
     plog_management_t *Plog_Management = nullptr;
