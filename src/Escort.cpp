@@ -48,7 +48,7 @@ static PersistentMetaData* Escort::init_heap(const char* nvm_path, uint64_t heap
 // Escort API
 void escort_init(const char* nvm_path, uint32_t num_checkpointing_threads, bool recovery)
 {
-  DEBUG_PRINT(__FUNC__);
+  DEBUG_PRINT(__func__);
 #if 0
   // Determine the file path.
   // In escort.cpp, "_sb" is added as a file suffix.
@@ -87,7 +87,7 @@ void escort_init(const char* nvm_path, uint32_t num_checkpointing_threads, bool 
 
 // Escort API
 bool escort_is_recovery(const char* nvm_path) {
-  DEBUG_PRINT(__FUNC__);
+  DEBUG_PRINT(__func__);
   string filename = string(nvm_path) + "_escort";
   PersistentMetaData md;
   if (md.open(filename.c_str()) != 0)
@@ -97,7 +97,7 @@ bool escort_is_recovery(const char* nvm_path) {
 
 // Escort API
 void escort_finalize(){
-  DEBUG_PRINT(__FUNC__);
+  DEBUG_PRINT(__func__);
   gv::isPersisting = false;
   gv::CpMaster->join();
   delete persistent_metadata;
@@ -106,7 +106,7 @@ void escort_finalize(){
 
 // Escort API
 void escort_thread_init() {
-  DEBUG_PRINT(__FUNC__);
+  DEBUG_PRINT(__func__);
   assert(lv::ctx == nullptr);
   lv::ctx = new Escort::userthreadctx_t();
   gv::CpMaster->init_userthreadctx(lv::ctx);

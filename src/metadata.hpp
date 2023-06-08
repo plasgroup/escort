@@ -19,7 +19,7 @@ class PersistentMetaData {
     const uint64_t EPOCH_OFFSET = 16;
     const uint64_t PLOG_AREA_OFFSET = 64;
 
-    const uint64_t MAGIC = 0101010101010101;
+    const uint64_t MAGIC = 0x0101010101010101;
 
 public:
     PersistentMetaData() : fd(-1), map_size(0), map_addr(0) {}

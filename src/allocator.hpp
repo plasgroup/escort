@@ -1,3 +1,5 @@
+#ifndef ALLOCATOR_HPP
+#define ALLOCATOR_HPP
 
 #ifdef ALLOCATOR_RALLOC
 
@@ -55,3 +57,5 @@ inline void pm_free(void* ptr) {
 #else
 #error no PM allocator is specified
 #endif
+
+#endif // ALLOCATOR_HPP

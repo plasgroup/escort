@@ -6,7 +6,7 @@ LDFLAGS = -L../jemalloc/lib -L../bin -L../ralloc/test -lescortdbg -lralloc -lpth
 
 CFLAGS = -O0 -g
 
-TEST_PROGS = 01_init 02_threadinit
+TEST_PROGS = 01_init 02_threadinit 03_pnew 04_transaction
 
 all: $(TEST_PROGS)
 

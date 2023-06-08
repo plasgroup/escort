@@ -7,6 +7,8 @@
 #include <new>
 #include <iostream>
 
+#include "allocator.hpp"
+
 #ifdef ALLOCATOR_RALLOC
 namespace Escort {
   class PersistentMetaData;
@@ -42,7 +44,9 @@ namespace Escort {
   constexpr std::uint64_t LOG_CACHE_LINE_SIZE = 6;
   constexpr std::uint64_t CACHE_LINE_SIZE = (1L << LOG_CACHE_LINE_SIZE);
   extern std::size_t HEAP_SIZE;
+#ifndef ALLOCATOR_RALLOC
   extern std::intptr_t DRAM_BASE;
+#endif // ALLOCATOR_RALLOC
 
 #ifdef ALLOCATOR_RALLOC  
   extern PersistentMetaData* persistent_metadata;
@@ -92,7 +96,11 @@ namespace Escort {
 
   template<typename T>
   inline std::intptr_t diff_addr(T* addr) {
+  #ifdef ALLOCATOR_RALLOC
+    return reinterpret_cast<intptr_t>(addr) - reinterpret_cast<intptr_t>(dram_base);
+  #else // ALLOCATOR_RALLOC
     return reinterpret_cast<std::intptr_t>(addr) - DRAM_BASE;
+  #endif // ALLOCATOR_RALLOC
   }
 
 #ifdef ALLOCATOR_RALLOC
