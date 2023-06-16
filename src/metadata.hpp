@@ -14,12 +14,21 @@ class PersistentMetaData {
     uint64_t map_size;
     uintptr_t map_addr;
 
+    const uint64_t MAX_ROOTS = 1000;
+
     const uint64_t MAGIC_OFFSET = 0;
     const uint64_t DRAM_BASE_OFFSET = 8;
     const uint64_t EPOCH_OFFSET = 16;
-    const uint64_t PLOG_AREA_OFFSET = 64;
+    const uint64_t ROOT_AREA_OFFSET = 64;
+    const uint64_t PLOG_AREA_OFFSET = ROOT_AREA_OFFSET + ROOT_ENTRY_SIZE * MAX_ROOTS * 2;
 
     const uint64_t MAGIC = 0x0101010101010101;
+
+    const uint64_t ROOT_ENTRY_SIZE = 16;
+    struct root_entry {
+        uintptr_t addr;
+        int dirty;
+    };
 
 public:
     PersistentMetaData() : fd(-1), map_size(0), map_addr(0) {}
@@ -45,6 +54,13 @@ public:
         return map_size - PLOG_AREA_OFFSET;
     }
 
+    root_entry get_root(int evenodd, int id) {
+        uint64_t offset = ROOT_AREA_OFFSET;
+        offset += (evenodd * MAX_ROOTS + id) * ROOT_ENTRY_SIZE;
+        return *reinterpret_cast<root_entry*>(map_addr + offset);
+    }
+
+    
 #define DEFINE_ACCESSOR(T, N, O)    \
     T get_##N() {   \
         return *reinterpret_cast<T*>(map_addr + O); \
