@@ -36,9 +36,12 @@ void Escort::PersistentMetaData::close() {
     map_size = 0;
 }
 
+// Initialize persistent data.
+// Do not call it in a recovery sequence.
 void Escort::PersistentMetaData::init(void* dram_base) {
     set_dram_base(dram_base, false);
     set_epoch(-1, false);
     set_magic(MAGIC, false);
+    roots().init();
     _mm_sfence();
 }

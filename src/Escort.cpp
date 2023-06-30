@@ -6,6 +6,7 @@
 #include <string>
 #include "metadata.hpp"
 #include "allocator.hpp"
+#include "roots.hpp"
 #include "debug.hpp"
 
 // escort1 header
@@ -137,17 +138,35 @@ void escort_write_region(void* addr, std::size_t size) {
   assert(lv::ctx != nullptr);
   lv::ctx->mark(addr, size);
 }
-void escort_set_root(const char* id, void* addr) {
+void escort_set_root(int id, void* addr) {
   assert(lv::ctx != nullptr);
-  lv::ctx->set_root(id, addr);
+  epoch_t epoch = lv::ctx->get_epoch(std::memory_order_relaxed);
+  bool in_transaction = true;
+  if(epoch == 0) {
+    lv::ctx->begin_op();
+    in_op = false;
+  }
+  persistent_metadata->roots.set_root(Epoch(epoch), epoch_phase(epoch) == epoch_phase::Multi_Epoch_Existence, id, addr);
+  if (!in_transaction)
+    lv::ctx->end_op();
 }
-void* escort_get_root(const char* id) {
+void* escort_get_root(int id) {
   assert(lv::ctx != nullptr);
-  return lv::ctx->get_root(id);
+  epoch_t epoch = lv::ctx->get_epoch(std::memory_order_relaxed);
+  bool in_transaction = true;
+  if(epoch == 0) {
+    lv::ctx->begin_op();
+    in_op = false;
+  }
+  void* ret = persistent_metadata->roots.get_root(Epoch(epoch), id);
+  if (!in_transaction)
+    lv::ctx->end_op();
+  return ret;
 }
-void escort_remove_root(const char* id) {
+void escort_remove_root(int id) {
   assert(lv::ctx != nullptr);
-  lv::ctx->get_root(id);
+  //lv::ctx->get_root(id);
+  // noop
 }
 
 void escort_get_current_status(int* epoch, int* phase,

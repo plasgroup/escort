@@ -8,14 +8,37 @@
 #include "allocator.hpp"
 #include "bitmap.hpp"
 
+#include "globalEscort.hpp"
+
 namespace Escort {
 class PersistentRoots {
+    using raid_t = int16_t;  // ID of ralloc
+    static const raid_t INVALID = -1;
+
     static const uint64_t RALLOC_MAX_ROOTS = ::MAX_ROOTS;
     static const uint64_t MAX_ROOTS = RALLOC_MAX_ROOTS >> 2;
+
     struct root_array {
-        std::atomic<int16_t> ralloc_id[MAX_ROOTS];
+        std::atomic<raid_t> ralloc_id[MAX_ROOTS];
     };
-    root_array roots[4];    // persistent
+    root_array rootsets[4];    // persistent
+
+    int rootset_index(int epoch) {
+        return (epoch + 4) & 3;
+    }
+
+    std::atomic<raid_t>& get_raid(int epoch, int id) {
+        int index = rootset_index(epoch);
+        return rootsets[index].ralloc_id[id];
+    }
+
+    void make_persistent(int epoch) {
+        int index = rootset_index(epoch);
+        for (uintptr_t p = reinterpret_cast<uintptr_t>(&rootsets[index].ralloc_id[0]);
+                p < reinterpret_cast<uintptr_t>(&rootsets[index].ralloc_id[MAX_ROOTS]);
+                p += CACHE_LINE_SIZE)
+            _mm_clwb(reinterpret_cast<void*>(p));              
+    }
 
     Bitmap<RALLOC_MAX_ROOTS> used_ralloc_ids;
     static_assert(RALLOC_MAX_ROOTS < (1 << (sizeof(uint16_t) << 3)));
@@ -32,82 +55,89 @@ class PersistentRoots {
 
     public:
 
+    void init() {
+        for (int j = 0; j < 4; j++)
+            for (int i = 0; i < MAX_ROOTS; i++)
+                rootsets[j].ralloc_id[i].store(INVALID, std::memory_order_relaxed);
+        used_ralloc_ids.clear_all();
+    }
+
+    // in transaction or sequential
+    // [thread local] epoch is given
     void *get_root(int epoch, int id) {
-        int curr_index = epoch & 3;
-        int prev_index = (epoch + 3) & 3;
-        if (roots[curr_index].ralloc_id[id] != -1)
-            return pm_get_root<char>(roots[curr_index].ralloc_id[id]);
-        else if (roots[prev_index][id] != -1)
-            return pm_get_root<char>(roots[prev_index].ralloc_id[id]);
+        raid_t raid = get_raid(epoch + 1, id).load(std::memory_order_relaxed);
+        if (raid == INVALID)
+            raid = get_raid(epoch, id).load(std::memory_order_relaxed);
+        if (raid != INVALID)
+            return pm_get_root<char>(raid);
         return nullptr;
     }
 
-    void set_root(int epoch, bool async_phase, int id, void* ptr) {
-        int curr_index = epoch & 3;
-        if (roots[curr_index].ralloc_id[id] == -1 || async_phase) {
-            int ralloc_id = allocate_ralloc_id();
-            pm_set_root(ptr, ralloc_id);
-            roots[curr_index].ralloc_id[id] = ralloc_id;
+    // in transaction or sequential
+    // [thread local] epoch is given
+    void set_root(int epoch, bool prepare_phase, int id, void* ptr) {
+        std::atomic<raid_t>& curr = get_raid(epoch + 1, id);
+        if (curr.load(std::memory_order_relaxed) == -1 || prepare_phase) {
+            raid_t raid = allocate_ralloc_id();
+            pm_set_root(ptr, raid);
+            curr.store(raid, std::memory_order_relaxed);
         } else
-            pm_set_root(ptr, roots[curr_index].ralloc_id[id]);
+            pm_set_root(ptr, curr.load(std::memory_order_relaxed));
     }
 
-    // recover the given epoch
+    // recover the given [persistent epoch]
+    //   epoch persistent (in use)
+    //   +1    RO or persistent -> persistent
+    //   +2    RW or RO         -> RW
+    //   +3    ?                -> clean
     void recovery(int epoch) {
-        int curr_index = epoch & 3;
-        // clear other epochs
-        for (int j = 0; j < 4; j++)
-            if (j != curr_index)
-                for (int i = 0; i < MAX_ROOTS; i++)
-                    roots[j].ralloc_id[i] = -1;
-        // notify ralloc, and
-        // set up bitmap
         used_ralloc_ids.clear_all();
         for (int i = 0; i < MAX_ROOTS; i++) {
-            uint16_t rid = roots[curr_index].ralloc_id[i]; 
-            used_ralloc_ids.set(rid);
-            pm_get_root<char>(rid);
+            raid_t raid = get_raid(epoch, i).load(std::memory_order_relaxed);
+            get_raid(epoch + 1, i).store(raid, std::memory_order_relaxed);
+            get_raid(epoch + 2, i).store(raid, std::memory_order_relaxed);
+            get_raid(epoch + 3, i).store(INVALID, std::memory_order_relaxed);
+            used_ralloc_ids.set(raid);
+            pm_get_root<char>(raid);
         }
+        make_persistent(epoch + 1);
     }
 
     // call in persistent phase
-    //   prev prev epoch is persistent
-    //   prev epoch is read only
+    //   -2    persistent (in use)
+    //   -1    persistent
+    //   epoch RO
+    //   +1    RW partial -> RW total
     void advance(int epoch) {
         int curr_index = epoch & 3;
         int prev_index = (epoch + 3) & 3;
         for (int i = 0; i < MAX_ROOTS; i++) {
-            uint16_t curr = roots[curr_index].ralloc_id[i];
-            uint16_t prev = roots[prev_index].ralloc_id[i];
-            if (curr == -1 && prev != -1)
-                roots[curr_index].ralloc_id[i].compare_exchange_strong(curr, prev);
+            raid_t prev = get_raid(epoch, i).load(std::memory_order_relaxed);
+            if (prev != INVALID) {
+                raid_t curr = get_raid(epoch + 1, i).load(std::memory_order_relaxed);
+                if (curr == INVALID)
+                    get_raid(epoch + 1, i).compare_exchange_weak(curr, prev);
+            }
         }
     }
 
-    // call in replay phase
-    //   prev prev epoch is unused <-- release this
-    //   prev epoch is persistent
-    void release_old(int epoch) {
-        int prev_index = (epoch + 3) & 3;
-        int prev_prev_index = (epoch + 2) & 3;
+    // call in release phase
+    //   -2    unused       -> clean
+    //   -1    persistent
+    //   epoch RO           -> persistent
+    //   +1    RW total
+    void release(int epoch) {
         for (int i = 0; i < MAX_ROOTS; i++) {
-            uint16_t prev_prev = roots[prev_prev_index].ralloc_id[i];
-            if (prev_prev != -1)
-                if (roots[prev_index].ralloc_id[i] != prev_prev)
-                    free_ralloc_id(prev_prev);
+            std::atomic<raid_t>& to_release = get_raid(epoch - 2, i);
+            raid_t raid = to_release.load(std::memory_order_relaxed);
+            if (raid != INVALID) {
+                raid_t next = get_raid(epoch - 1, i).load(std::memory_order_relaxed);
+                if (raid != next)
+                    free_ralloc_id(raid);
+                to_release.store(INVALID, std::memory_order_relaxed);
+            }
         }
-        for (int i = 0; i < MAX_ROOTS; i++)
-            roots[prev_prev_index].ralloc_id[i] = -1;
-    }
-
-    // call in inactive phase
-    //  prev epoch is persistent
-    void prepare(int epoch) {
-        int prev_index = (epoch + 3) & 3;
-        for (uintptr_t p = reinterpret_cast<uintptr_t>(&roots[prev_index].ralloc_id[0]);
-                p < reinterpret_cast<uintptr_t>(&roots[prev_index].ralloc_id[MAX_ROOTS]);
-                p += CACHE_LINE_SIZE)
-            _mm_clwb(reinterpret_cast<void*>(p));              
+        make_persistent(epoch);
     }
 };
 }
