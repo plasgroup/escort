@@ -18,9 +18,10 @@ void escort_end_op();
 void escort_write_region(void* addr, std::size_t size);
 void escort_set_root(int id, void* addr);
 void* escort_get_root(int id);
+void* escort_get_root_internal(int id);
 template<class T>
-T* escort_get_root(const char* id) {
-  return reinterpret_cast<T*>(escort_get_root(id));
+T* escort_get_root(int id) {
+  return reinterpret_cast<T*>(escort_get_root_internal(id));
 }
 void escort_remove_root(const char* id);
 

@@ -25,14 +25,16 @@ int main(int argc, char* argv[]) {
     escort_write_region(a, sizeof(int*[10]));
 
     escort_end_op();
-    escort_begin_op();
+    for (int j = 0; j < 1000000; j++) {
+        escort_begin_op();
 
-    for (int i = 0; i < 10; i++) {
-        *a[i] = i;
-        escort_write_region(a[i], sizeof(int));
+        for (int i = 0; i < 10; i++) {
+            *a[i] = i;
+            escort_write_region(a[i], sizeof(int));
+        }
+
+        escort_end_op();
     }
-
-    escort_end_op();
 
     escort_thread_finalize();
 

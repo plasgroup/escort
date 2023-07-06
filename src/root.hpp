@@ -1,10 +1,13 @@
+#ifndef ROOT_HPP
+#define ROOT_HPP
+
 #include <stdint.h>
 #include <unistd.h>
 #include <x86intrin.h>
 
 #include <atomic>
 
-#include "ralloc.hpp"
+#include "../ralloc/src/ralloc.hpp"
 #include "allocator.hpp"
 #include "bitmap.hpp"
 
@@ -141,3 +144,5 @@ class PersistentRoots {
     }
 };
 }
+
+#endif // ROOT_HPP

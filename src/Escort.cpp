@@ -6,7 +6,7 @@
 #include <string>
 #include "metadata.hpp"
 #include "allocator.hpp"
-#include "roots.hpp"
+#include "root.hpp"
 #include "debug.hpp"
 
 // escort1 header
@@ -144,21 +144,22 @@ void escort_set_root(int id, void* addr) {
   bool in_transaction = true;
   if(epoch == 0) {
     lv::ctx->begin_op();
-    in_op = false;
+    in_transaction = false;
   }
-  persistent_metadata->roots.set_root(Epoch(epoch), epoch_phase(epoch) == epoch_phase::Multi_Epoch_Existence, id, addr);
+  bool prepare_phase =  epoch_phase(epoch) == epoch_phase::Multi_Epoch_Existence;
+  persistent_metadata->roots().set_root(Epoch(epoch),prepare_phase, id, addr);
   if (!in_transaction)
     lv::ctx->end_op();
 }
-void* escort_get_root(int id) {
+void* escort_get_root_internal(int id) {
   assert(lv::ctx != nullptr);
   epoch_t epoch = lv::ctx->get_epoch(std::memory_order_relaxed);
   bool in_transaction = true;
   if(epoch == 0) {
     lv::ctx->begin_op();
-    in_op = false;
+    in_transaction = false;
   }
-  void* ret = persistent_metadata->roots.get_root(Epoch(epoch), id);
+  void* ret = persistent_metadata->roots().get_root(Epoch(epoch), id);
   if (!in_transaction)
     lv::ctx->end_op();
   return ret;

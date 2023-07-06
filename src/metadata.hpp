@@ -46,6 +46,11 @@ public:
 
     void init(void* dram_base);
 
+    uintptr_t offset_in_persistent_image(void* ptr) {
+        uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
+        return addr - map_addr;
+    }
+
     uintptr_t get_plog_area_addr() {
         return map_addr + PLOG_AREA_OFFSET;
     }

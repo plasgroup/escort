@@ -8,6 +8,8 @@
 #include <list>
 #include <mutex>
 
+#include "metadata.hpp"
+
 #include "globalEscort.hpp"
 #include "cacheline_t.hpp"
 #include "debug.hpp"
@@ -37,10 +39,13 @@ public:
     inline const entry_t* entries() const { return reinterpret_cast<const entry_t*>(&_entries); }
     inline bool append(std::pair<cacheline_t*, cacheline_t&> entry) {
       if(_size > LOG_BLOCK_NUM)
-	DEBUG_ERROR("plog size error:", _size);
+      	DEBUG_ERROR("plog size error:", _size);
       if(_size == LOG_BLOCK_NUM)
-	return false;
+	      return false;
       
+      printf("write persistent log: %08lo %p ", persistent_metadata->offset_in_persistent_image(&_entries[_size]), entry.first);
+      printf("\n");
+
       _entries[_size].addr = entry.first;
       _mm_clwb(&_entries[_size].addr);
       _entries[_size].val = entry.second;

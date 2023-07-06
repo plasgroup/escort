@@ -1,3 +1,6 @@
+#ifndef BITMAP_HPP
+#define BITMAP_HPP
+
 #include <atomic>
 
 namespace Escort {
@@ -40,12 +43,14 @@ public:
         for (; index < NWORDS; index++, shift = 0) {
             word_t x = bits[index].load(std::memory_order_relaxed);
             if ((x | ((word_t(1) << shift) - 1)) != ~word_t(0))
-                for (word_t msk = word_t(1) << shift; (x & msk) != 0; msk <<= 1, shift++) {
-                    int i = index * BITS_IN_WORD + shift;
-                    if (i >= NELEMS)
-                        return -1;
-                    if (!(set_if_found && set(i)))
-                        return i;
+                for (word_t msk = word_t(1) << shift; shift < BITS_IN_WORD; msk <<= 1, shift++) {
+                    if ((x & msk) == 0) {
+                        int i = index * BITS_IN_WORD + shift;
+                        if (i >= NELEMS)
+                            return -1;
+                        if (!(set_if_found && set(i)))
+                            return i;
+                    }
                 }
         }
         return -1;
@@ -53,3 +58,5 @@ public:
 };
 
 }
+
+#endif // BITMAP_HPP

@@ -172,11 +172,12 @@ void userthreadctx_t::mark(void* addr, std::size_t size) {
   for(; index < end_index; index++) {
     if(!gv::BitMap[curr]->is_set(index)) { // set bit
       if(gv::BitMap[prev]->is_set(index)) { // check whether CoW
-	debug::add_plog_user();
-	cacheline_t &old_val = *(reinterpret_cast<cacheline_t*>(addr));
-	gv::BitMap[prev]->clear(index);
-	_log->push_back_and_clwb({reinterpret_cast<cacheline_t*>(addr), old_val});
+        debug::add_plog_user();
+        cacheline_t &old_val = *(reinterpret_cast<cacheline_t*>(addr));
+        gv::BitMap[prev]->clear(index);
+        _log->push_back_and_clwb({reinterpret_cast<cacheline_t*>(addr), old_val});
       }
+      printf("bit set %ld [%p] curr = %d %p\n", index, addr, curr, lv::ctx);
       gv::BitMap[curr]->set(index);
       is_append_list = true;
     }
